@@ -800,7 +800,7 @@ if __name__ == '__main__':
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
 #  - questionable, if utf-8 is a good default encoding
-#  - detect encoding -*- encoding: -*- in N first lines
+#  - detect encoding -*- coding: -*- in N first lines
 #  - CppLexer vs. CLexer
 
 # Enhancements
