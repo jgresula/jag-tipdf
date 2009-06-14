@@ -1,0 +1,13 @@
+\#*\#
+*~
+*.pyc
+*.pdf
+jagpdf.py
+_jagpdf.so
+MANIFEST
+input/
+build/
+dist/
+doc/index.htm
+doc/jag2pdf.1.gz
+
