@@ -3,7 +3,7 @@
 =========
 jag-tipdf
 =========
-:Author: Jaroslav Grešula
+:Author: Jaroslav Gresula
 :Contact: jarda@jagpdf.org
 :Version: 0.1-alpha
 :Date: $Date:$
