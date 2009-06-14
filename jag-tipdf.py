@@ -446,7 +446,7 @@ def create_doc_profile(opts):
     if encrypted:
         profile.set('doc.encryption', 'standard')
     #profile.set("doc.trace_level", "5")
-    profile.set("doc.compressed", "0")
+    #profile.set("doc.compressed", "0")
     return profile
 
 def create_initial_context(opts):
