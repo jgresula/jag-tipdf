@@ -193,11 +193,15 @@ def load_image(ctx, stream):
 #                           Text
 
 re_file_enc = re.compile('-\*- .*coding:\s*([^ ;]+).*-\*-', re.M | re.S)
+class CannotHighlight: pass
+
 def show_text(ctx, stream):
     if ctx.opts.highlight:
-        highlight_text(ctx, stream)
-    else:
-        iter_lines(ctx, stream)
+        try:
+            return highlight_text(ctx, stream)
+        except CannotHighlight:
+            pass
+    iter_lines(ctx, stream)
 
 def highlight_text(ctx, stream):
     try:
@@ -226,7 +230,7 @@ def highlight_text(ctx, stream):
     except ImportError:
         raise Error("Pygments not installed, cannot highlight")
     except pygments.util.ClassNotFound, exc:
-        raise Error("Pygments error: " + str(exc))
+        raise CannotHighlight()
 
 
 class CodecStreamWrap:
