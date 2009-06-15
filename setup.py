@@ -25,9 +25,13 @@ import sys
 import re
 import os
 import glob
+import platform
 
-jagpdf_version_URL = 'http://192.168.1.138:8000/version'
-jagpdf_downloads_URL = 'http://192.168.1.138:8000/downloads/'
+
+jagpdf_server = '192.168.1.138:8000'
+jagpdf_server = 'jagpdf.org'
+jagpdf_version_URL = 'http://' +  jagpdf_server + '/version'
+jagpdf_downloads_URL = 'http://' + jagpdf_server + '/downloads/'
 
 # check: 2.4 <= version < 3.0
 py_major, py_minor = sys.version_info[0:2]
@@ -85,9 +89,7 @@ def fetch_jagpdf():
             break
     site_packages = get_python_lib(prefix=prefix)
     if not os.access(site_packages, os.W_OK):
-        pass
-        #report_err("%s not writable." % site_packages)
-    import platform
+        report_err("%s not writable." % site_packages)
     processor = platform.machine()
     if processor.endswith('86'):
         processor = 'x86'
@@ -103,6 +105,8 @@ def fetch_jagpdf():
     stem = 'jagpdf-%s.%s.%s.py%s' % (version, op_sys, processor, py_version)
     from cStringIO import StringIO
     if op_sys.startswith('win'):
+        print >>sys.stderr, '--fetch-jagpdf not implemented on windows yet'
+        sys.exit(1)
         import zipfile
         tarball_url = jagpdf_downloads_URL + stem + '.zip'
         zip = zipfile.ZipFile(StringIO(urlopen(tarball_url).read()), 'r')
@@ -130,7 +134,7 @@ check JagPDF homepage at http://jagpdf.org.""")
         tar.extractall(members=jagpdf_files)
         tar.close()
         for f in jagpdf_files:
-            shutil.move(f.name, '/tmp')#site_packages)
+            shutil.move(f.name, site_packages)
         print 'cleanup'
         shutil.rmtree(stem)
         print 'JagPDF installation done.'
@@ -186,16 +190,17 @@ if 'install' in sys.argv:
 #
 from distutils.core import setup
 
-# non-windows
-data_files = [('/usr/shared/doc/jagpdf', ['README.rst'] + glob.glob('doc/*')),
-              ('', ['doc/jag-tipdf.1.gz'])]
+if platform.system() == 'Linux':
+    data_files = [('/usr/local/share/doc/jag-tipdf', ['README.rst'] + glob.glob('doc/*')),
+                  ('/usr/local/share/man/man1', glob.glob('doc/jag-tipdf.1.gz'))]
+else:
+    data_files = []
     
 setup(name='jag-tipdf',
       version='0.1.0',
-      description='Plain text and image converter to PDF.',
+      description='Combines plain text and images into a single PDF.',
       author='Jaroslav Gresula',
       author_email='jarda@jagpdf.org',
-      url='http://www.jagpdf.org/jag-tipdf',
       scripts=['jag-tipdf.py'],
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
@@ -209,4 +214,12 @@ setup(name='jag-tipdf',
                    "Topic :: Utilities",
                    "Topic :: Text Processing"])
 
+
+#
+# TBD
+# -----
+#  --fetch-jagpdf
+#    - implement on windows
+#    - compile to pyc during install
+#  setup(url='http://www.jagpdf.org/?')
 

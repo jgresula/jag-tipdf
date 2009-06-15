@@ -171,8 +171,9 @@ def load_image_to_document(ctx, img_data):
     
 
 def load_image(ctx, stream):
-    if ctx.input_name in ctx.img_cache:
-       return ctx.img_cache[ctx.input_name]
+    key = (ctx.input_name,ctx.opts.image_dpi)
+    if key in ctx.img_cache:
+       return ctx.img_cache[key]
     try:
         img = load_image_to_document(ctx, stream.read())
     except jagpdf.Exception:
@@ -184,13 +185,14 @@ def load_image(ctx, stream):
                 break
     if not img:
         raise Error("Unsupported image format.")
-    ctx.img_cache[ctx.input_name] = img
+    ctx.img_cache[key] = img
     return img
 
 
 # ----------------------------------------------------------------------
 #                           Text
 
+re_file_enc = re.compile('-\*- .*coding:\s*([^ ;]+).*-\*-', re.M | re.S)
 def show_text(ctx, stream):
     if ctx.opts.highlight:
         highlight_text(ctx, stream)
@@ -204,51 +206,64 @@ def highlight_text(ctx, stream):
         from pygments.lexers import get_lexer_for_filename
         from pygments.styles import get_style_by_name
         lexer = get_lexer_for_filename(ctx.input_name)
-        lexer.encoding = ctx.opts.encoding
+        stream_data = stream.read()
+        m = re_file_enc.search(stream_data, 0, 160)
+        if m:
+            lexer.encoding = m.group(1)
+        else:
+            lexer.encoding = ctx.opts.encoding
         lexer.tabsize = ctx.opts.tabsize
-        token_iter = lex(stream.read(), lexer)
-        print lexer
+        token_iter = lex(stream_data, lexer)
+        #print lexer
         style = get_style_by_name('default')
         driver = TxtDriver(ctx, style)
         for token in token_iter:
-            print token
-            if not enough_space_on_page(ctx, driver.line_height()):
-                driver.on_next_page()
-            if token[1].endswith('\n'):
-                if len(token[1]) > 1:
-                    driver.on_text(token[1][0:-1])
-                driver.on_line_end()
-            elif token[0] == '\f':
-                driver.on_next_page()
-            else:
-                driver.on_text(token[1], token[0])
+            #print token
+            driver.on_text(token[1], token[0])
     except ImportError:
         raise Error("Pygments not installed, cannot highlight")
     except pygments.util.ClassNotFound, exc:
         raise Error("Pygments error: " + str(exc))
-        
-def iter_lines(ctx, stream):
-    if ctx.opts.encoding != 'utf-8':
+
+
+class CodecStreamWrap:
+    def __init__(self, ctx, stream):
+        self.stream = stream
+        self.line_nr = 0
+        if ctx.opts.encoding != 'utf-8':
+            self.install_codec(ctx.opts.encoding)
+        else:
+            self.encoder = lambda x: x
+            self.decoder = lambda x: x
+
+    def readline(self):
+        line = self.stream.readline()
+        if self.line_nr < 2:
+            m = re_file_enc.search(line)
+            if m:
+                self.install_codec(m.group(1))
+                self.line_nr = 2
+            else:
+                self.line_nr += 1
+        return self.encoder(self.decoder(line)[0])[0]
+            
+    def install_codec(self, enc):
         import codecs
-        reader_factory = codecs.getreader(ctx.opts.encoding)
-        stream = reader_factory(stream)
-    driver = TxtDriver(ctx)
-    expand_tabs = ctx.opts.tabsize * ' '
-    for line in stream.readlines():
-        line.replace('\t', expand_tabs)
-        spans = [s for s in line.split('\f')]
-        while spans:
-            span = spans.pop(0)
-            if span != '':
-                if not enough_space_on_page(ctx, driver.line_height()):
-                    driver.on_next_page()
-                driver.on_text(span.rstrip())
-                driver.on_line_end()
-            if spans: # form feed
-                driver.on_next_page()
+        self.encoder = codecs.getencoder('utf-8')
+        self.decoder = codecs.getdecoder(enc)
 
     
-
+def iter_lines(ctx, stream):
+    cstream = CodecStreamWrap(ctx, stream)
+    driver = TxtDriver(ctx)
+    expand_tabs = ctx.opts.tabsize * ' '
+    line = cstream.readline()
+    while line:
+        line.replace('\t', expand_tabs)
+        driver.on_text(line)
+        line = cstream.readline()
+    
+rex_line_split = re.compile("(\r?\n)|(\f)")
 class TxtDriver:
     """single text input"""
     def __init__(self, ctx, style=None):
@@ -271,9 +286,41 @@ class TxtDriver:
         self.line_nr += 1
         self.canvas = None
         self.ctx.y -= self.line_height()
-        
+
+    def process_token(self, token):
+        try:
+            color = self.style_to_color[token]
+        except KeyError:
+            color = self.style.style_for_token(token)['color']
+            if color:
+                color = parse_color(color)
+            else:
+                color = self.ctx.opts.font_color
+            self.style_to_color[token] = color
+        self.canvas.color("f", *color)
+
     def on_text(self, text, token=None):
+        m = rex_line_split.search(text)
+        if not m:
+            self.on_span(text, token)
+        else:
+            search = 0
+            while m:
+                self.on_span(text[search:m.start()], token)
+                if m.group(1):
+                    self.on_line_end()
+                else:
+                    assert m.group(2)
+                    self.on_next_page()
+                search = m.end()
+                m = rex_line_split.search(text, search)
+            if search < len(text):
+                self.on_span(text[search:], token) 
+        
+    def on_span(self, text, token=None):
         if not self.canvas:
+            if not enough_space_on_page(self.ctx,self.line_height()):
+                self.on_next_page()
             self.paint_zebra(self.ctx.y)
             baseline = self.ctx.y - self.ctx.font.height() - self.ctx.font.bbox_ymin()
             self.canvas = self.ctx.doc.page().canvas()
@@ -282,16 +329,7 @@ class TxtDriver:
                 place_bookmark(self.ctx)
                 self.first_time = False
         if token:
-            try:
-                color = self.style_to_color[token]
-            except KeyError:
-                color = self.style.style_for_token(token)['color']
-                if color:
-                    color = parse_color(color)
-                else:
-                    color = self.ctx.opts.font_color
-                self.style_to_color[token] = color
-            self.canvas.color("f", *color)
+            self.process_token(token)
         self.canvas.text(text)
         
     def on_next_page(self):
@@ -576,7 +614,7 @@ def create_opt_parser():
                           description=desc)
     parser.set_defaults(page=[8.3 * 72, 11.7 * 72], #a4
                         fontsize=10,
-                        encoding='utf-8',
+                        encoding='iso-8859-1',
                         charspacing=0.0,
                         linespacing=0.0,
                         font_color=(0, 0, 0),
@@ -794,14 +832,11 @@ if __name__ == '__main__':
 # TBD:
 # ----
 #  - nup
-#  - image cache should be keyed by dpi as well
 #  - underscore overpaint by a zebra stripe
-#  - pygments new_line handling
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
-#  - questionable, if utf-8 is a good default encoding
-#  - detect encoding -*- coding: -*- in N first lines
 #  - CppLexer vs. CLexer
+#  - output to pipe on windows results in malformed PDF
 
 # Enhancements
 # ------------
@@ -811,3 +846,4 @@ if __name__ == '__main__':
 # - headers/footers
     
     
+
