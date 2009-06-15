@@ -203,9 +203,12 @@ def highlight_text(ctx, stream):
     try:
         import pygments
         from pygments import lex
-        from pygments.lexers import get_lexer_for_filename
+        from pygments.lexers import get_lexer_for_filename, get_lexer_by_name
         from pygments.styles import get_style_by_name
-        lexer = get_lexer_for_filename(ctx.input_name)
+        if ctx.input_name.endswith('.h'):
+            lexer = get_lexer_by_name('cpp')
+        else:
+            lexer = get_lexer_for_filename(ctx.input_name)
         stream_data = stream.read()
         m = re_file_enc.search(stream_data, 0, 160)
         if m:
@@ -835,7 +838,8 @@ if __name__ == '__main__':
 #  - underscore overpaint by a zebra stripe
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
-#  - CppLexer vs. CLexer
+#  - Pygments
+#    - if a lexer is not found -> just ignore or warn
 #  - output to pipe on windows results in malformed PDF
 
 # Enhancements
