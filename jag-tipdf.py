@@ -227,11 +227,9 @@ def highlight_text(ctx, stream):
             lexer.encoding = ctx.opts.encoding
         lexer.tabsize = ctx.opts.tabsize
         token_iter = lex(stream_data, lexer)
-        #print lexer
         style = get_style_by_name('default')
         driver = TxtDriver(ctx, style)
         for token in token_iter:
-            #print token
             driver.on_text(token[1], token[0])
     except ImportError:
         raise Error("Pygments not installed, cannot highlight")
@@ -831,7 +829,6 @@ def get_stream(ctx, input_name):
     if ctx.opts.shellcmd:
         cmd = subst_template(ctx, ctx.opts.shellcmd)
         try:
-            print cmd
             pipe = Popen(cmd, stdout=PIPE, shell=True)
             out, err = pipe.communicate()
             return StringIO(out), not re_is_img.match(input_name)
