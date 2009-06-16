@@ -77,7 +77,7 @@ To clone the branch, do: ::
  $ git clone git://github.com/jgresula/jag-tipdf.git    
 
 Examples
--------------------
+--------
 
 The following commands send PDF to stdout.
 
@@ -92,9 +92,7 @@ The following commands send PDF to stdout.
        --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
        --bookmark=%filestem
 
-Manual
-------
 
-[TBD]
+
 
 

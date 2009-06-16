@@ -614,7 +614,7 @@ def hook_separator(option, opt, value, parser):
     setattr(parser.values, option.dest, result)
 
 def create_opt_parser():
-    usage = """usage: %prog [doc-level-options] commands"""
+    usage = """usage: %prog [global-options] [[input-options] INPUT] ..."""
     desc = __doc__
     # A command comprises of input file options and an input file ('-' stands
     # for if token[ stdin). lists are comma separated, units are 1/72 inch,
@@ -733,7 +733,7 @@ def create_opt_parser():
     parser.add_option_group(groupt)
     parser.add_option_group(groupi)
     #
-    group = OptionGroup(parser, "Document level options")
+    group = OptionGroup(parser, "Global options")
     group.add_option("-o", "--output-file",
                       action='store', type='string', dest="outfile",
                       help="output is sent to FILE, defaults to stdout",
@@ -864,7 +864,7 @@ if __name__ == '__main__':
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
 #  - output to pipe on windows results in malformed PDF
-#  - tbd cmd err code
+#  - tbd cmd err code (according to docs - linux only)
 
 # Enhancements
 # ------------

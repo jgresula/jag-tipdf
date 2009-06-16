@@ -9,5 +9,5 @@ input/
 build/
 dist/
 doc/index.htm
-doc/jag2pdf.1.gz
+doc/*.1.gz
 
