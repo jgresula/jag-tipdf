@@ -38,6 +38,9 @@ from optparse import OptionParser, OptionValueError, OptionGroup
 import re
 import os
 from urllib2 import urlopen, HTTPError, URLError
+from subprocess import Popen, PIPE
+from cStringIO import StringIO
+
 
 
 class Bunch:
@@ -75,14 +78,19 @@ def enough_space_on_page(ctx, y):
 
 def place_bookmark(ctx):
     if ctx.opts.bookmark:
-        spec = 'mode=XYZ; top=%.02f' % ctx.y
+        if ctx.opts.separator == PageBreak:
+            y = ctx.opts.page[1]
+        else:
+            y = ctx.y
+        spec = 'mode=XYZ; top=%.02f' % y
         expanded = subst_template(ctx, ctx.opts.bookmark)
         ctx.doc.outline().item(expanded, spec)
 
 def subst_template(ctx, text):
     s = {'%basename' : os.path.basename(ctx.input_name),
          '%path' : ctx.input_name,
-         '%page' : str(ctx.paging.page_nr + 1)}
+         '%page' : str(ctx.paging.page_nr + 1),
+         '%filestem' : os.path.basename(os.path.splitext(ctx.input_name)[0])}
     def replace(match):
         return s[match.group(0)]
     rex_str = "|".join([k for k in s.iterkeys()])
@@ -142,7 +150,6 @@ def paint_image(ctx, stream):
 
 def load_image_imagemagick(ctx, img_data):
     try:
-        from subprocess import Popen, PIPE
         convert = Popen(["convert", "-", "png:-"], stdin=PIPE, stdout=PIPE)
         out, err = convert.communicate(img_data)
         if convert.returncode != 0:
@@ -154,7 +161,6 @@ def load_image_imagemagick(ctx, img_data):
 def load_image_pil(ctx, img_data):
     try:
         from PIL import Image
-        from cStringIO import StringIO
         pil_img = Image.open(StringIO(img_data))
         png = StringIO()
         pil_img.save(png, "PNG")
@@ -389,7 +395,7 @@ class Paging:
 
     def finalize(self):
         if self.is_page_open:
-            self.page_end()
+            Paging.page_end(self)
 
     def establish_state(self):
         opts = self.ctx.opts
@@ -447,10 +453,10 @@ def nup_matrices(power, w, h):
     c = 1.0 / math.sqrt(2 ** power)
     if power % 2:
         return [(0.0, c, -c, 0.0, i * h * c, j * w * c) \
-                for i in range(dim, 0, -1) for j in range(2 * dim)]
+                for i in range(1, dim+1) for j in range(2 * dim)]
     else:
         return [(c, 0.0, 0.0, c, j * w * c, i * h * c) \
-                for i in range(dim) for j in range(dim)]
+                for i in range(dim-1, -1, -1) for j in range(dim)]
 
 # ----------------------------------------------------------------------
 #                        state management
@@ -638,14 +644,15 @@ def create_opt_parser():
                         zebra=None,
                         nup=None,
                         is_text=True,
-                        separator=36.0,  # TBD: false does not work
+                        separator=PageBreak,
                         image_align='left',
                         image_fit_wider=True,
                         image_dpi=None,
                         outfile='-',
                         bookmark=None,
                         highlight=False,
-                        tabsize=4
+                        tabsize=4,
+                        shellcmd=None
                         )
     group = OptionGroup(parser, "Common input options")
     group.add_option("--margins",
@@ -675,6 +682,8 @@ def create_opt_parser():
                      callback=hook_separator,
                      help="add vertical SPACE after the input; setting SPACE to 'break' inserts a page break",
                      metavar="SPACE")
+    group.add_option("--shell", action='store', dest='shellcmd',
+                     help="run CMD for each input", metavar='CMD')
     groupt = OptionGroup(parser, "Text input options")
     groupt.add_option("--font",
                      action='store', type='string', dest='font',
@@ -765,13 +774,17 @@ def create_opt_parser():
     
     return parser
 
+arg_re = r'((?:(?<=\\)"|[^"])+)' # anything except " not preceded by \
+reg_args = re.compile(r'(?<!\\)"%s(?<!\\)"|(\S+)' % arg_re, re.M | re.S)
 def expand_args(args):
     """Expands arguments with those defined in an external @file"""
     result = []
     for arg in args:
         if arg.startswith('@'):
-            from_file = " ".join(open(arg[1:]).readlines())
-            result += from_file.split()
+            from_file = open(arg[1:]).read()
+            matches = re.finditer(reg_args, from_file)
+            fargs = [g.replace(r'\"', '"') for m in matches for g in m.groups() if g]
+            result += fargs
         else:
             result.append(arg)
     return result
@@ -782,8 +795,8 @@ def expand_args(args):
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
-    argv = expand_args(argv) # TBD: quoting
     try:
+        argv = expand_args(argv)
         parser = create_opt_parser()
         parser.disable_interspersed_args()
         ctx, opts = None, None
@@ -809,11 +822,22 @@ def main(argv=None):
         return 1
     except (URLError, HTTPError), err:
         print >>sys.stderr, 'Cannot read from remote stream:', err.reason[1]
+    except IOError, err:
+        print >>sys.stderr, 'IO Error:', err
 
 re_is_img = re.compile('^.*\.(?:png|jpg|bmp)$', re.I)
 re_is_url = re.compile('^(?:http|ftp)://\S+$', re.I)
 def get_stream(ctx, input_name):
-    if input_name == '-':
+    if ctx.opts.shellcmd:
+        cmd = subst_template(ctx, ctx.opts.shellcmd)
+        try:
+            print cmd
+            pipe = Popen(cmd, stdout=PIPE, shell=True)
+            out, err = pipe.communicate()
+            return StringIO(out), not re_is_img.match(input_name)
+        except OSError, why:
+            raise Error("cmd execution failed:" + str(why))
+    elif input_name == '-':
         return sys.stdin, ctx.opts.is_text
     else:
         if re_is_url.match(input_name):
@@ -825,8 +849,8 @@ def get_stream(ctx, input_name):
 re_is_img = re.compile('^.*\.(?:png|jpg|bmp)$', re.I)
 def process_input(ctx, input_name):
     """Processes single input."""
-    stream, is_text = get_stream(ctx, input_name)
     ctx.input_name = input_name
+    stream, is_text = get_stream(ctx, input_name)
     if is_text:
         show_text(ctx, stream)
     else:
@@ -838,13 +862,12 @@ if __name__ == '__main__':
 
 # TBD:
 # ----
-#  - nup
+#  - nup - now ok, support for 2, 4, 6, 9, 16
 #  - underscore overpaint by a zebra stripe
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
-#  - Pygments
-#    - if a lexer is not found -> just ignore or warn
 #  - output to pipe on windows results in malformed PDF
+#  - tbd cmd err code
 
 # Enhancements
 # ------------
