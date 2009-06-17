@@ -81,7 +81,8 @@ def report_err(msg, what=''):
     
 def get_platform_info():
     """Retrieves (processor, operating-system) tuple"""
-    if sys.maxint > 2**31-1:
+    import struct
+    if struct.calcsize('P') > 4:
         report_err("Prebuilt JagPDF is available for 32-bit Python only.")
     processor = platform.machine()
     if not processor:
