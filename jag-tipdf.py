@@ -57,6 +57,12 @@ class PDFStream(jagpdf.StreamOut):
     def __init__(self, opts):
         if opts.outfile == '-':
             self.out = sys.stdout
+            try:
+                # set stdout to binary mode on windows
+                import msvcrt
+                msvcrt.setmode(1, os.O_BINARY)
+            except ImportError:
+                pass
         else:
             self.out = open(opts.outfile, 'wb')
         jagpdf.StreamOut.__init__(self)
@@ -863,7 +869,6 @@ if __name__ == '__main__':
 #  - underscore overpaint by a zebra stripe
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
-#  - output to pipe on windows results in malformed PDF
 #  - tbd cmd err code (according to docs - linux only)
 
 # Enhancements

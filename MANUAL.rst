@@ -25,15 +25,28 @@ standard output. The *INPUT* can be either plain text or an image.
 
 The PDF file is initially configured according to *global-options*. Then for
 each *INPUT* its *input-options* are applied and the *INPUT* is appended to the
-PDF file. Once an *input-option* is specified, its value remains valid accross
-the following *INPUT*\s.
-
-Note, that all *global-options* must precede the first *INPUT*, otherwise they
-will have no effect.
-
+PDF file. 
 
 OPTIONS
 ~~~~~~~
+
+Once an *input-option* is specified, its value remains valid accross the
+following *INPUT*\s. All *global-options* must precede the first *INPUT*,
+otherwise they will have no effect.
+
+Some options requires units which is 1/72 inch. There are several option value types:
+
+* LIST comma separated list of items
+* COLOR hexadecimal *rrggbb* value 
+* STRING a string that contain variables
+
+- %basename 
+- %path
+- %page
+- %filestem
+
+General Options
+...............
 
 -h, --help
  show a help message and exit

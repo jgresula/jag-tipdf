@@ -26,7 +26,7 @@ import re
 import os
 import glob
 import platform
-
+from cStringIO import StringIO
 
 jagpdf_server = '192.168.1.138:8000'
 jagpdf_server = 'jagpdf.org'
@@ -39,6 +39,7 @@ if py_major != 2 or py_minor < 4:
     print >> sys.stderr, 'jag-tipdf requires Python version 2.4 or higher.'
     sys.exit(2)
 
+    
 def fetch_file(url, err_msg=''):
     """Retrieves a resource from given url. Aborts on failure."""
     from urllib2 import urlopen, HTTPError, URLError
@@ -50,12 +51,12 @@ def fetch_file(url, err_msg=''):
         sys.exit(3)
     try:
         return urlopen(url).read()
-    except HTTPError, why:
-        on_error(why)
-    except URLError, why:
+    except (HTTPError, URLError), why:
         on_error(why)
 
+        
 def verify_checksum(tarball_url, tarball_data):
+    """Fetches a checksum for given url and uses it to verify data"""
     if py_minor < 5:
         import md5
         md5_creator = md5.new
@@ -70,14 +71,96 @@ def verify_checksum(tarball_url, tarball_data):
     if expected_digest != md5_obj.hexdigest():
         print >>sys.stderr, "Checksum failed, aborting."
     print "checksum ok"
+    
 
 def report_err(msg, what=''):
     """Prints an erorr message to stderr and exits."""
     print >> sys.stderr, 'ERROR:', msg, what
     sys.exit(2)
+
+    
+def get_platform_info():
+    """Retrieves (processor, operating-system) tuple"""
+    if sys.maxint > 2**31-1:
+        report_err("Prebuilt JagPDF is available for 32-bit Python only.")
+    processor = platform.machine()
+    if not processor:
+        try:
+            processor = os.environ['PROCESSOR_ARCHITECTURE']
+        except KeyError:
+            report_err("Cannot determine your processor type.")
+    if processor.endswith('86'):
+        processor = 'x86'
+    if sys.platform.startswith('linux'):
+        op_sys = 'linux'
+    else:
+        op_sys = sys.platform.lower()
+    return processor, op_sys
+
+
+class JagPDFDownloader:
+    """Base class for downloading and installing JagPDF"""
+    def __init__(self, url):
+        self.tarball_url = url
+
+    def fetch(self):
+        self.data = fetch_file(self.tarball_url, """
+This might indicate, that prebuilt JagPDF is not available for your
+platform. For more information, please visit the JagPDF homepage at
+http://jagpdf.org.""")
+        verify_checksum(self.tarball_url, self.data)
+
+
+class JagPDFDownloaderWin(JagPDFDownloader):
+    """Downloads and installs JagPDF on Windows."""
+    def __init__(self, stem):
+        JagPDFDownloader.__init__(self, jagpdf_downloads_URL + stem + '.zip')
+
+    def unpack(self, site_packages):
+        import zipfile
+        zip = zipfile.ZipFile(StringIO(self.data), 'r')
+        rex = re.compile('(_jagpdf[^/]*.pyd$)|(/jagpdf.py$)')
+        jagpdf_files = [f for f in zip.namelist() if rex.search(f)]
+        assert len(jagpdf_files) == 2
+        for f in jagpdf_files:
+            base = os.path.basename(f)
+            dest = os.path.join(site_packages, base)
+            print 'copying %s -> %s' % (base, dest)
+            data = zip.read(f)
+            open(dest, 'wb').write(data)
+            
+
+class JagPDFDownloaderLinux(JagPDFDownloader):
+    """Downloads and installs JagPDF on Linux"""
+    def __init__(self, stem):
+        JagPDFDownloader.__init__(self, jagpdf_downloads_URL + stem + '.tar.bz2')
+        self.stem = stem
+
+    def unpack(self, site_packages):
+        import tarfile
+        import shutil
+        from subprocess import Popen, PIPE
+        try:
+            print "unbzipping"
+            bzcat = Popen(["bzcat"], stdin=PIPE, stdout=PIPE)
+            out, err = bzcat.communicate(self.data)
+        except OSError:
+            report_err("bzcat not found. Cannot continue.")
+        tar = tarfile.open("nonexistent", 'r', StringIO(out))
+        rex = re.compile('(_jagpdf[^/]*.so$)|(/jagpdf.py$)')
+        jagpdf_files = [f for f in tar.getmembers() if rex.search(f.name)]
+        assert len(jagpdf_files) == 2
+        tar.extractall(members=jagpdf_files)
+        tar.close()
+        for f in jagpdf_files:
+            print 'copying %s -> %s' % (os.path.basename(f.name), site_packages)
+            shutil.move(f.name, site_packages)
+        print 'cleanup'
+        shutil.rmtree(self.stem)
+
         
 def fetch_jagpdf():
-    """Fetches the JagPDF library from http://jagpdf.org"""
+    """Fetches the prebuilt JagPDF library from http://jagpdf.org"""
     # check write access to site_packages/ early to avoid repetitive library
     # downloads if the user forgets to run this script with administrative
     # privileges
@@ -90,55 +173,24 @@ def fetch_jagpdf():
     site_packages = get_python_lib(prefix=prefix)
     if not os.access(site_packages, os.W_OK):
         report_err("%s not writable." % site_packages)
-    processor = platform.machine()
-    if processor.endswith('86'):
-        processor = 'x86'
-    if sys.platform.startswith('linux'):
-        op_sys = 'linux'
-    else:
-        op_sys = sys.platform.lower()
+    processor, op_sys = get_platform_info()
     py_version = "%d%d" % sys.version_info[0:2]
     print 'determining the latest JagPDF version'
     version = fetch_file(jagpdf_version_URL, \
                          "Cannot determine JagPDF version").strip()
     print version
-    stem = 'jagpdf-%s.%s.%s.py%s' % (version, op_sys, processor, py_version)
-    from cStringIO import StringIO
+    # download and install proper prebuilt package
     if op_sys.startswith('win'):
-        print >>sys.stderr, '--fetch-jagpdf not implemented on windows yet'
-        sys.exit(1)
-        import zipfile
-        tarball_url = jagpdf_downloads_URL + stem + '.zip'
-        zip = zipfile.ZipFile(StringIO(urlopen(tarball_url).read()), 'r')
+        down_cls = JagPDFDownloaderWin
     else:
-        import tarfile
-        import shutil
-        from subprocess import Popen, PIPE
-        tarball_url = jagpdf_downloads_URL + stem + '.tar.bz2'
-        print "fetching JagPDF for your platform (%s.%s)" % (processor, op_sys)
-        data = fetch_file(tarball_url, """
-This might indicate, that JagPDF is not available for your platform. Please
-check JagPDF homepage at http://jagpdf.org.""")
-        verify_checksum(tarball_url, data)
-        try:
-            print "unbzipping"
-            bzcat = Popen(["bzcat"], stdin=PIPE, stdout=PIPE)
-            out, err = bzcat.communicate(data)
-        except OSError:
-            report_err("bzcat not found. Cannot continue.")
-        tar = tarfile.open("nonexistent", 'r', StringIO(out))
-        rex = re.compile('(_jagpdf[^/]*.so$)|(/jagpdf.py$)')
-        jagpdf_files = [f for f in tar.getmembers() if rex.search(f.name)]
-        assert len(jagpdf_files) == 2
-        print 'copying JagPDF files to', site_packages
-        tar.extractall(members=jagpdf_files)
-        tar.close()
-        for f in jagpdf_files:
-            shutil.move(f.name, site_packages)
-        print 'cleanup'
-        shutil.rmtree(stem)
-        print 'JagPDF installation done.'
-
+        down_cls = JagPDFDownloaderLinux
+    stem = 'jagpdf-%s.%s.%s.py%s' % (version, op_sys, processor, py_version)
+    downloader = down_cls(stem)
+    print "fetching JagPDF for your platform (%s.%s)" % (processor, op_sys)
+    downloader.fetch()
+    downloader.unpack(site_packages)
+    print 'JagPDF installation done.'
+    
 def custom_install():
     """Checks for JagPDF, download and install it optionally."""
     # should be JagPDF fetched automatically?
