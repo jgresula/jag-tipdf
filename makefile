@@ -5,11 +5,12 @@
 doc/index.htm: README.rst MANUAL.rst
 	cat README.rst MANUAL.rst | \
 		sed '/.. manpage-start/,/.. manpage-header-end/d' | \
-		rst2html --cloak-email-addresses - doc/index.htm
+		rst2html --cloak-email-addresses \
+				 --link-stylesheet \
+				 --stylesheet-path=doc/style.css \
+				 - doc/index.htm
 	sed -i "s/[$$]Date:[$$]/`date -R`/g" doc/index.htm
 
-#--link-stylesheet \
-#--stylesheet-path=doc/voidspace.css \
 
 #
 # Manual is built using rst2man from MANUAL.rst, sed skips a section belonging

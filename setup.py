@@ -319,5 +319,6 @@ setup(name='jag-tipdf',
 #  --fetch-jagpdf
 #    - compile to pyc during install
 #  tests - figure out python interpreter path (see var jag_tipdf)
+#        - has_pil, has_imagemagick predicates
 #  setup(url='http://www.jagpdf.org/?')
 

@@ -53,44 +53,46 @@ Features
 .. _imagemagick: http://www.imagemagick.org/script/index.php
 .. _Pygments: http://pygments.org
 
-
-Installation
-~~~~~~~~~~~~
-
-[*pre-alpha stage*] ::
-
- $ python setup.py install
-
-If JagPDF is not installed on your system, you can use ``--fetch-jagpdf``, which
-downloads and installs prebuilt JagPDF (Linux only). Otherwise you have to
-install JagPDF `manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
-
-
 Download
 ~~~~~~~~
 
 The software is in an alpha state, the development branch is available at
 `GitHub <http://github.com/jgresula/jag-tipdf>`_.
 
-To clone the branch, do: ::
+To clone the branch, do:
 
- $ git clone git://github.com/jgresula/jag-tipdf.git    
+ .. sourcecode:: console
+
+   $ git clone git://github.com/jgresula/jag-tipdf.git    
+
+
+Installation
+~~~~~~~~~~~~
+
+ .. sourcecode:: console
+
+   $ python setup.py install
+
+If JagPDF is not installed on your system, you can use ``--fetch-jagpdf``, which
+downloads and installs prebuilt JagPDF (Linux only). Otherwise you have to
+install JagPDF `manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
+
 
 Examples
 --------
 
 The following commands send PDF to stdout.
 
-::
+ .. sourcecode:: console
 
- $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
- $ find . -name '*.txt' -print0 | xargs -0 ./jag-tipdf --bookmark=%basename
- $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
- $ find /usr/share/man/man1 -name '*.gz' | \
-       sort | \
-       xargs ./jag-tipdf \
-       --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
-       --bookmark=%filestem
+   $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
+   $ find . -name '*.txt' -print0 | xargs -0 ./jag-tipdf --bookmark=%basename
+   $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
+   $ find /usr/share/man/man1 -name '*.gz' | \
+   >     sort | \
+   >     xargs ./jag-tipdf \
+   >     --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
+   >     --bookmark=%filestem
 
 
 
