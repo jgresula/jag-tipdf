@@ -25,7 +25,7 @@ import sys
 
 # check: 2.4 <= version < 3.0
 py_major, py_minor = sys.version_info[0:2]
-if py_major != 2 or py_minor < 4:
+if sys.hexversion < 0x2040000:
     print >> sys.stderr, 'jag-tipdf requires Python version 2.4 or higher.'
     sys.exit(2)
  
@@ -60,12 +60,12 @@ def fetch_file(url, err_msg=''):
         
 def verify_checksum(tarball_url, tarball_data):
     """Fetches a checksum for given url and uses it to verify data"""
-    if py_minor < 5:
-        import md5
-        md5_creator = md5.new
-    else:
+    try:
         import hashlib
         md5_creator = hashlib.md5
+    except ImportError:
+        import md5
+        md5_creator = md5.new
     print "fetching checksum"
     md5_data = fetch_file(tarball_url + '.md5')
     expected_digest = md5_data.split()[0]
@@ -168,13 +168,13 @@ def fetch_jagpdf():
     # downloads if the user forgets to run this script with administrative
     # privileges
     from distutils.sysconfig import get_python_lib
-    prefix = None
-    for arg in sys.argv:
-        if arg.startswith('--prefix='):
-            prefix = arg.split('=')[1]
-            break
     site_packages = get_python_lib(prefix=prefix)
-    if not os.access(site_packages, os.W_OK):
+    if not os.path.isdir(site_packages):
+        try:
+            os.makedirs(site_packages)
+        except (OSError, IOError), why:
+            report_err("cannot create %s, %s" % (site_packages, str(why)))
+    elif not os.access(site_packages, os.W_OK):
         report_err("%s not writable." % site_packages)
     processor, op_sys = get_platform_info()
     py_version = "%d%d" % sys.version_info[0:2]
@@ -239,14 +239,11 @@ http://www.jagpdf.org/doc/jagpdf/installation.htm
 
 
 def run_tests():
-    if sys.platform.lower().startswith('win'):
-        dev_nul='nul'
-    else:
-        dev_nul='/dev/null'
+    """Run tests defined in file 'tests'"""
+    dev_nul=os.devnull
     jag_tipdf = 'python jag-tipdf'
     sys.argv.remove('test')
     retcode = 0
-    python = 'python'
     for line in open('tests'):
         check_returncode = lambda x : x == 0
         line = line.strip()
@@ -269,6 +266,15 @@ def run_tests():
     return retcode
 
 
+
+from distutils.core import setup
+import distutils.sysconfig
+prefix = distutils.sysconfig.get_config_var('prefix')
+for arg in sys.argv:
+    if arg.startswith('--prefix='):
+        prefix = arg.split('=')[1]
+        break
+
 if 'install' in sys.argv:
     custom_install()
 
@@ -276,23 +282,24 @@ if 'test' in sys.argv:
     sys.exit(run_tests())
     
 
+if platform.system() == 'Linux':
+    MANDIR = os.path.join(prefix, 'share/man/man1')
+    DOCDIR = os.path.join(prefix, 'share/doc/jag-tipdf')
+    data_files = [(DOCDIR, ['README.rst'] + glob.glob('doc/*')),
+                  (MANDIR, glob.glob('doc/jag-tipdf.1.gz'))]
+else:
+    data_files = []
+
 #
 # standard distutils code
 #
-from distutils.core import setup
-
-if platform.system() == 'Linux':
-    data_files = [('/usr/local/share/doc/jag-tipdf', ['README.rst'] + glob.glob('doc/*')),
-                  ('/usr/local/share/man/man1', glob.glob('doc/jag-tipdf.1.gz'))]
-else:
-    data_files = []
     
 setup(name='jag-tipdf',
       version='0.1.0',
       description='Combines plain text and images into a single PDF.',
       author='Jaroslav Gresula',
       author_email='jarda@jagpdf.org',
-      scripts=['jag-tipdf.py'],
+      scripts=['jag-tipdf'],
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
       classifiers=["Development Status :: 3 - Alpha",
@@ -310,7 +317,7 @@ setup(name='jag-tipdf',
 # TBD
 # -----
 #  --fetch-jagpdf
-#    - implement on windows
 #    - compile to pyc during install
+#  tests - figure out python interpreter path (see var jag_tipdf)
 #  setup(url='http://www.jagpdf.org/?')
 
