@@ -7,6 +7,7 @@ _jagpdf.so
 MANIFEST
 build/
 dist/
+tmp/
 doc/index.htm
 doc/*.1.gz
 

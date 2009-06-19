@@ -280,15 +280,21 @@ if 'install' in sys.argv:
 
 if 'test' in sys.argv:
     sys.exit(run_tests())
-    
 
+scripts = ['jag-tipdf']
 if platform.system() == 'Linux':
     MANDIR = os.path.join(prefix, 'share/man/man1')
     DOCDIR = os.path.join(prefix, 'share/doc/jag-tipdf')
     data_files = [(DOCDIR, ['README.rst'] + glob.glob('doc/*')),
                   (MANDIR, glob.glob('doc/jag-tipdf.1.gz'))]
 else:
+    import shutil
+    if not os.path.isdir('tmp'):
+        os.makedirs('tmp')
+    shutil.copy('jag-tipdf', 'tmp/jag-tipdf.py')
     data_files = []
+    scripts += ['winlaunch/jag-tipdf.exe', 'tmp/jag-tipdf.py']
+
 
 #
 # standard distutils code
@@ -299,7 +305,7 @@ setup(name='jag-tipdf',
       description='Combines plain text and images into a single PDF.',
       author='Jaroslav Gresula',
       author_email='jarda@jagpdf.org',
-      scripts=['jag-tipdf'],
+      scripts=scripts,
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
       classifiers=["Development Status :: 3 - Alpha",
