@@ -69,6 +69,8 @@ To clone the branch, do:
 Installation
 ~~~~~~~~~~~~
 
+To install jag-tipdf, run
+
  .. sourcecode:: console
 
    $ python setup.py install
@@ -76,6 +78,12 @@ Installation
 If JagPDF is not installed on your system, you can use ``--fetch-jagpdf``, which
 downloads and installs prebuilt JagPDF (Linux only). Otherwise you have to
 install JagPDF `manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
+
+Optionally, you can run tests:
+
+ .. sourcecode:: console
+ 
+   $ python setup.py test
 
 
 Examples
