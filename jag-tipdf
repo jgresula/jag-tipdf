@@ -674,11 +674,6 @@ def create_opt_parser():
     parser.add_option("--force-imagemagick", action="store_true", dest="force_imagemagick",
                       help=SUPPRESS_HELP)
     group = OptionGroup(parser, "Common input options")
-    group.add_option("--margins",
-                     action='callback', type='string', dest="margins",
-                     callback=hook_margins,
-                     help="set page margins, MARGINS is a top,right,bottom,left list",
-                     metavar="MARGINS")
     group.add_option("--input-type",
                      action="callback", type="string", dest="input_type",
                      callback=hook_string_remap, callback_args=(optset_intype,),
@@ -692,16 +687,21 @@ def create_opt_parser():
                      action='callback', type='string', dest="page_color",
                      callback=hook_color,
                      help="set the page background color [white]", metavar="COLOR")
+    group.add_option("--margins",
+                     action='callback', type='string', dest="margins",
+                     callback=hook_margins,
+                     help="set page margins, MARGINS is a top,right,bottom,left list",
+                     metavar="MARGINS")
     group.add_option("--bookmark",
                      action='store', type='string', dest='bookmark',
-                     help="create a bookmark labelled with STRING", metavar='STRING')
+                     help="create a bookmark labeled with STRING", metavar='STRING')
     group.add_option("--separator",
                      action='callback', type='string', dest='separator',
                      callback=hook_separator,
                      help="add vertical SPACE after the input; setting SPACE to 'break' inserts a page break",
                      metavar="SPACE")
     group.add_option("--shell", action='store', dest='shellcmd',
-                     help="run CMD for each input", metavar='CMD')
+                     help="run CMD for and use its stdout", metavar='CMD')
     groupt = OptionGroup(parser, "Text input options")
     groupt.add_option("--font",
                      action='store', type='string', dest='font',

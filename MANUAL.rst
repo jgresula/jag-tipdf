@@ -43,7 +43,7 @@ There are several option argument types:
 
 * LIST comma separated list of items
 * COLOR hexadecimal *rrggbb* value 
-* STRING a string that contain variables
+* STRING a string that can contain the following variables
   * %basename 
   * %path
   * %page
@@ -65,30 +65,34 @@ Common Input Options
 ....................
 
 --input-type=TYPE
-  Set the type of the input to. If *TYPE* set to **auto** and the file has a known
-  image extension then **jag-tipdf** treats the input as an image, otherwise as
+  Set the type of the *INPUT*. If *TYPE* set to **auto** and the file has a known
+  image extension then **jag-tipdf** treats the *INPUT* as an image, otherwise as
   plain text. The option arguments **text** and **image** explicitly set the
   type of the input. You might need to use this option if an image comes from
   stdin, or if the file has a non-standard extension. Default value: **auto**.
 
 --page=FORMAT
   Set the page size. *FORMAT* can be either **A4**, **Letter**, or *width*,\
-  *height*. Default value: **A4**
+  *height* in units. Default value: **A4**
 
 --page-color=COLOR
   Set the page background color.
 
---bookmark=STRING
-  tbd
-
---separator=SEP
-  tbd
-
---shell=CMD
-  tbd
-
 --margins=MARGINS
   Set page margins. *MARGINS* is a *top*,\ *right*,\ *bottom*,\ *left* list.
+
+--bookmark=STRING
+  Add a node labeled with *STRING* to the bookmark tree and associate it with
+  the *INPUT*.
+
+--separator=SPACE
+  Add vertical *SPACE* after the *INPUT*. *SPACE* can be either a distance (even
+  negative) expressed in units or **break** which inserts a page break. Default
+  value: **break**.
+
+--shell=CMD
+  Execute *CMD* through the shell and use its stdout instead of the original
+  *INPUT*.
 
  
  
