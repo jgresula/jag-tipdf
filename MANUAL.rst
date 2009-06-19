@@ -19,13 +19,18 @@ SYNOPSIS
 DESCRIPTION
 ~~~~~~~~~~~
 
-**jag-tipdf** sequentially appends *INPUT*\s (or standard input if the file
+**jag-tipdf** sequentially appends *INPUT*\ s (or standard input if the file
 name - is given) to a PDF file. By default, **jag-tipdf** sends the PDF file to
-standard output. The *INPUT* can be either plain text or an image.
+standard output. The *INPUT* can be either a path to a local file or a URL.
 
 The PDF file is initially configured according to *global-options*. Then for
 each *INPUT* its *input-options* are applied and the *INPUT* is appended to the
-PDF file. 
+PDF file.
+
+The *INPUT* can be either plain text or an image. **jag-tipdf** natively
+supports JPEG and PNG image formats. Where available, other formats are
+supported through conversion to PNG using PIL (Python Imaging Library) or
+imagemagick.
 
 OPTIONS
 ~~~~~~~
@@ -34,16 +39,17 @@ Once an *input-option* is specified, its value remains valid accross the
 following *INPUT*\s. All *global-options* must precede the first *INPUT*,
 otherwise they will have no effect.
 
-Some options requires units which is 1/72 inch. There are several option value types:
+There are several option argument types:
 
 * LIST comma separated list of items
 * COLOR hexadecimal *rrggbb* value 
 * STRING a string that contain variables
+  * %basename 
+  * %path
+  * %page
+  * %filestem
 
-- %basename 
-- %path
-- %page
-- %filestem
+* UNITS 1/72 inch
 
 General Options
 ...............
@@ -52,26 +58,25 @@ General Options
  show a help message and exit
 
 --version
- show program's version nubmer and exit
+ show program's version number and exit
 
 
 Common Input Options
 ....................
 
---margins=LIST
-  tbd
+--input-type=TYPE
+  Set the type of the input to. If *TYPE* set to **auto** and the file has a known
+  image extension then **jag-tipdf** treats the input as an image, otherwise as
+  plain text. The option arguments **text** and **image** explicitly set the
+  type of the input. You might need to use this option if an image comes from
+  stdin, or if the file has a non-standard extension. Default value: **auto**.
 
--i, --image
-  tbd
-
--t, --text
-  tbd
-
---page=PAGE
-  tbd
+--page=FORMAT
+  Set the page size. *FORMAT* can be either **A4**, **Letter**, or *width*,\
+  *height*. Default value: **A4**
 
 --page-color=COLOR
-  tbd
+  Set the page background color.
 
 --bookmark=STRING
   tbd
@@ -82,6 +87,10 @@ Common Input Options
 --shell=CMD
   tbd
 
+--margins=MARGINS
+  Set page margins. *MARGINS* is a *top*,\ *right*,\ *bottom*,\ *left* list.
+
+ 
  
 
 Text Input Options

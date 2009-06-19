@@ -1,0 +1,16 @@
+$jag_tipdf input/lipsum.txt > output/lipsum.pdf
+$jag_tipdf --margins=10,10,10,10 input/lipsum.txt > output/margins.pdf
+$jag_tipdf input/pseudocz_fvar.txt > output/filevar.pdf
+$jag_tipdf --encoding=iso-8859-2 input/pseudocz.txt > output/iso8859_2.pdf
+
+# images - PIL & imagemagick
+$jag_tipdf input/logo.png > output/logo.pdf
+$jag_tipdf --force-imagemagick input/logo.tiff > output/logotiff.pdf
+$jag_tipdf --force-pil input/logo.ppm > output/logoppm.pdf
+
+# --input-type
+@fail $jag_tipdf input/lipsum_no_image.png > $dev_nul
+$jag_tipdf --input-type=text input/lipsum_no_image.png > output/lipsum_explicit_text.pdf
+$jag_tipdf --input-type=image input/logo.txt > output/logo_explicit_image.pdf
+cat input/logo.png | $jag_tipdf --input-type=image > output/logo_stdin.pdf -
+

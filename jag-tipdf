@@ -34,7 +34,7 @@ This application requires the JagPDF library. It seems that it is not installed
 on your system. The application cannot continue.
 """)
     sys.exit(1)
-from optparse import OptionParser, OptionValueError, OptionGroup
+from optparse import OptionParser, OptionValueError, OptionGroup, SUPPRESS_HELP
 import re
 import os
 from urllib2 import urlopen, HTTPError, URLError
@@ -159,7 +159,7 @@ def load_image_imagemagick(ctx, img_data):
         convert = Popen(["convert", "-", "png:-"], stdin=PIPE, stdout=PIPE)
         out, err = convert.communicate(img_data)
         if convert.returncode != 0:
-            raise Error("convert failed with %d\n%s" % (convert.returncode, err))
+            return None
         return load_image_to_document(ctx, out)
     except OSError:
         return None # imagemagick not found
@@ -186,12 +186,18 @@ def load_image(ctx, stream):
     key = (ctx.input_name,ctx.opts.image_dpi)
     if key in ctx.img_cache:
        return ctx.img_cache[key]
+    img_data = stream.read()
     try:
-        img = load_image_to_document(ctx, stream.read())
+        img = load_image_to_document(ctx, img_data)
     except jagpdf.Exception:
         # the input stream contains unsupported image format, try to convert it
-        for load_method in [load_image_pil,
-                            load_image_imagemagick]:
+        if ctx.opts.force_pil:
+            methods = [load_image_pil]
+        elif ctx.opts.force_imagemagick:
+            methods = [load_image_imagemagick]
+        else:
+            methods = [load_image_imagemagick, load_image_pil]
+        for load_method in methods:
             img = load_method(ctx, img_data)
             if img:
                 break
@@ -593,15 +599,18 @@ optmap_layout = {'single': 'SinglePage',
                  'cont': 'OneColumn',
                  'cont-facing': 'TwoColumnLeft'}
 
-optmap_perm = {'no_copy': 'no_copy',
+optset_perm = {'no_copy': 'no_copy',
                'no_print' : 'no_print',
                'no_modify' : 'no_modify'}
+optset_intype = set(['auto', 'text', 'image'])
 
 def hook_string_remap(option, opt, values, parser, optmap, is_list=False):
     result = []
     for value in values.split(','):
         if value in optmap:
-            result.append(optmap[value])
+            if type(optmap) == dict:
+                value = optmap[value]
+            result.append(value)
         else:
             raise OptionValueError("unrecognized value: %s" % values)
     if not is_list and len(result) > 1:
@@ -647,7 +656,6 @@ def create_opt_parser():
                         margins=Margins(parser, (72, 68, 72, 68)),
                         zebra=None,
                         nup=None,
-                        is_text=True,
                         separator=PageBreak,
                         image_align='left',
                         image_fit_wider=True,
@@ -656,20 +664,26 @@ def create_opt_parser():
                         bookmark=None,
                         highlight=False,
                         tabsize=4,
-                        shellcmd=None
+                        shellcmd=None,
+                        force_pil=False,
+                        force_imagemagick=False,
+                        input_type='auto'                        
                         )
+    parser.add_option("--force-pil", action="store_true", dest="force_pil",
+                      help=SUPPRESS_HELP)
+    parser.add_option("--force-imagemagick", action="store_true", dest="force_imagemagick",
+                      help=SUPPRESS_HELP)
     group = OptionGroup(parser, "Common input options")
     group.add_option("--margins",
                      action='callback', type='string', dest="margins",
                      callback=hook_margins,
                      help="set page margins, MARGINS is a top,right,bottom,left list",
                      metavar="MARGINS")
-    group.add_option("-i", "--image",
-                     action='store_false', dest='is_text',
-                     help="if unsure, insert the input file as an image")
-    group.add_option("-t", "--text",
-                     action='store_true', dest='is_text',
-                     help="if unsure, insert the input file as plain text [default]")
+    group.add_option("--input-type",
+                     action="callback", type="string", dest="input_type",
+                     callback=hook_string_remap, callback_args=(optset_intype,),
+                     help="set the type of the input, can be one of: text, image or auto [%default]",
+                     metavar="TYPE")
     group.add_option("--page",
                      action='callback', type='string', dest='page',
                      callback=hook_paper_format,
@@ -677,7 +691,7 @@ def create_opt_parser():
     group.add_option("--page-color",
                      action='callback', type='string', dest="page_color",
                      callback=hook_color,
-                     help="set page background COLOR [white]", metavar="COLOR")
+                     help="set the page background color [white]", metavar="COLOR")
     group.add_option("--bookmark",
                      action='store', type='string', dest='bookmark',
                      help="create a bookmark labelled with STRING", metavar='STRING')
@@ -765,7 +779,7 @@ def create_opt_parser():
     group.add_option("--user-perm",
                      action='callback', type='string', dest='userpermissions',
                      callback=hook_string_remap,
-                     callback_args=(optmap_perm, True),
+                     callback_args=(optset_perm, True),
                      help="set user permissions, LIST, can be a combination of: no_print, no_modify, and no_copy",
                      metavar="LIST")
     group.add_option("--n-up",
@@ -826,35 +840,45 @@ def main(argv=None):
         return 1
     except (URLError, HTTPError), err:
         print >>sys.stderr, 'Cannot read from remote stream:', err.reason[1]
+        return 1
     except IOError, err:
         print >>sys.stderr, 'IO Error:', err
+        return 1
 
-re_is_img = re.compile('^.*\.(?:png|jpg|bmp)$', re.I)
+re_is_img = re.compile('^.*\.(?:png|jpg|bmp|tiff|gif|p[pgbn]m)$', re.I)
+def treat_as_text(ctx):
+    if ctx.opts.input_type == 'auto':
+        return not re_is_img.match(ctx.input_name)
+    elif ctx.opts.input_type == 'text':
+        return True
+    else:
+        assert ctx.opts.input_type == 'image'
+        return False
+
 re_is_url = re.compile('^(?:http|ftp)://\S+$', re.I)
-def get_stream(ctx, input_name):
+def get_stream(ctx):
     if ctx.opts.shellcmd:
         cmd = subst_template(ctx, ctx.opts.shellcmd)
         try:
             pipe = Popen(cmd, stdout=PIPE, shell=True)
             out, err = pipe.communicate()
-            return StringIO(out), not re_is_img.match(input_name)
+            stream = StringIO(out)
         except OSError, why:
             raise Error("cmd execution failed:" + str(why))
-    elif input_name == '-':
-        return sys.stdin, ctx.opts.is_text
+    elif ctx.input_name == '-':
+        stream = sys.stdin
     else:
-        if re_is_url.match(input_name):
-            stream = urlopen(input_name)
+        if re_is_url.match(ctx.input_name):
+            stream = urlopen(ctx.input_name)
         else:
-            stream = open(input_name, 'rb')
-        return stream, not re_is_img.match(input_name)
+            stream = open(ctx.input_name, 'rb')
+    return stream
 
-re_is_img = re.compile('^.*\.(?:png|jpg|bmp)$', re.I)
 def process_input(ctx, input_name):
     """Processes single input."""
     ctx.input_name = input_name
-    stream, is_text = get_stream(ctx, input_name)
-    if is_text:
+    stream = get_stream(ctx)
+    if treat_as_text(ctx):
         show_text(ctx, stream)
     else:
         paint_image(ctx, stream)
@@ -870,6 +894,7 @@ if __name__ == '__main__':
 #  - form-feed - test in both modes (highlight, normal)
 #  - formatting of help options in parser.add_option
 #  - tbd cmd err code (according to docs - linux only)
+#  - binary stdin on win
 
 # Enhancements
 # ------------

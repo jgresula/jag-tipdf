@@ -22,24 +22,27 @@
 # SOFTWARE.
 
 import sys
-import re
-import os
-import glob
-import platform
-from cStringIO import StringIO
-
-jagpdf_server = '192.168.1.138:8000'
-jagpdf_server = 'jagpdf.org'
-jagpdf_version_URL = 'http://' +  jagpdf_server + '/version'
-jagpdf_downloads_URL = 'http://' + jagpdf_server + '/downloads/'
 
 # check: 2.4 <= version < 3.0
 py_major, py_minor = sys.version_info[0:2]
 if py_major != 2 or py_minor < 4:
     print >> sys.stderr, 'jag-tipdf requires Python version 2.4 or higher.'
     sys.exit(2)
+ 
+import re
+import os
+import glob
+import platform
+from cStringIO import StringIO
+from subprocess import Popen, PIPE
+from string import Template
 
-    
+
+jagpdf_server = '192.168.1.138:8000'
+jagpdf_server = 'jagpdf.org'
+jagpdf_version_URL = 'http://' +  jagpdf_server + '/version'
+jagpdf_downloads_URL = 'http://' + jagpdf_server + '/downloads/'
+
 def fetch_file(url, err_msg=''):
     """Retrieves a resource from given url. Aborts on failure."""
     from urllib2 import urlopen, HTTPError, URLError
@@ -140,7 +143,6 @@ class JagPDFDownloaderLinux(JagPDFDownloader):
     def unpack(self, site_packages):
         import tarfile
         import shutil
-        from subprocess import Popen, PIPE
         try:
             print "unbzipping"
             bzcat = Popen(["bzcat"], stdin=PIPE, stdout=PIPE)
@@ -235,8 +237,44 @@ http://www.jagpdf.org/doc/jagpdf/installation.htm
             print "FAILED\nAborting."
             sys.exit(3)
 
+
+def run_tests():
+    if sys.platform.lower().startswith('win'):
+        dev_nul='nul'
+    else:
+        dev_nul='/dev/null'
+    jag_tipdf = 'python jag-tipdf'
+    sys.argv.remove('test')
+    retcode = 0
+    python = 'python'
+    for line in open('tests'):
+        check_returncode = lambda x : x == 0
+        line = line.strip()
+        if not line or line[0] == '#':
+            continue
+        if line[0] == '@':
+            meta, line = line.split(' ', 1)
+            for m in meta.split(','):
+                if m == '@fail':
+                    check_returncode = lambda x: x != 0
+                else:
+                    assert 'unknown meta command'
+        line = Template(line).substitute(locals())
+        print line
+        p = Popen(line, shell=True, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        if not check_returncode(p.returncode):
+            print >>sys.stderr, 'FAILED:\n', err
+            retcode = 1
+    return retcode
+
+
 if 'install' in sys.argv:
     custom_install()
+
+if 'test' in sys.argv:
+    sys.exit(run_tests())
+    
 
 #
 # standard distutils code

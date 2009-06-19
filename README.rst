@@ -83,12 +83,12 @@ The following commands send PDF to stdout.
 
 ::
 
- $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf.py -
- $ find . -name '*.txt' -print0 | xargs -0 ./jag-tipdf.py --bookmark=%basename
- $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf.py - 
+ $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
+ $ find . -name '*.txt' -print0 | xargs -0 ./jag-tipdf --bookmark=%basename
+ $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
  $ find /usr/share/man/man1 -name '*.gz' | \
        sort | \
-       xargs ./jag-tipdf.py \
+       xargs ./jag-tipdf \
        --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
        --bookmark=%filestem
 

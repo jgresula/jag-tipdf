@@ -53,7 +53,7 @@ release:
 
 .PHONY: clean
 clean:
-	rm -f doc/index.htm	doc/jag-tipdf.1.gz
+	rm -f doc/index.htm	doc/jag-tipdf.1.gz output/*
 
 .PHONY: help
 

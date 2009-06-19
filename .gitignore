@@ -5,7 +5,6 @@
 jagpdf.py
 _jagpdf.so
 MANIFEST
-input/
 build/
 dist/
 doc/index.htm
