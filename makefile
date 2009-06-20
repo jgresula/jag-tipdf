@@ -1,37 +1,39 @@
 #
-# The html documentation is combined from README.rst and MANUAL.rst. There is a
-# special sed pre-processing which cuts out the man header needed by rst2man
+# The html documentation is produced from README.rst There is a special sed
+# pre-processing which enables Pygments (see comments in README.rst)
 # 
-doc/index.htm: README.rst MANUAL.rst
-	cat README.rst MANUAL.rst | \
-		sed '/.. manpage-start/,/.. manpage-header-end/d' | \
+doc/index.htm: README.rst
+	< README.rst \
+		sed 's/.. sourcecode/.. sourcecode::/g' | \
+		sed 's/^::$$//g' | \
 		rst2html --cloak-email-addresses \
 				 --link-stylesheet \
 				 --stylesheet-path=doc/style.css \
 				 - doc/index.htm
 	sed -i "s/[$$]Date:[$$]/`date -R`/g" doc/index.htm
 
-
 #
-# Manual is built using rst2man from MANUAL.rst, sed skips a section belonging
-# to the html output.
-#
+# Manual is built using rst2man from README.rst; sed skips a section belonging
+# to the html output (up to '.. manpage-start' placeholder) and the manual
+# prologue is added instead
+# 
 # good rst2man info:
 #  http://jimmyg.org/blog/2009/generating-man-pages-from-restructuredtext.html
+#
 #
 # Targets:
 #  man      .. builds the manpage
 #  mantest  .. builds the manpage and runs it with man
 # 
-doc/jag-tipdf.1.gz: MANUAL.rst	
+doc/jag-tipdf.1.gz: README.rst man.rst
 	env PYTHONPATH=/home/jarda/src/manpage-writer/ \
-		sed -n '/.. manpage-start/,$$p' MANUAL.rst | \
+		sed -n '/.. manpage-start/,$$p' README.rst | \
+		cat man.rst - | \
 	    /usr/bin/python \
 	    ~/src/manpage-writer/tools/rst2man.py --traceback \
 	    > jag-tipdf.1
 	gzip jag-tipdf.1
 	mv jag-tipdf.1.gz doc/
-
 
 man: doc/jag-tipdf.1.gz
 .PHONY: mantest
@@ -41,16 +43,23 @@ mantest: man
 	cp doc/jag-tipdf.1.gz /tmp/man1
 	man -M /tmp jag-tipdf
 
+
 #
-#
+# all: builds the html documentation and a manpage
 #
 all: doc/index.htm doc/jag-tipdf.1.gz	
 
+
+#
+# relase: prepares packages for distribution
+#
 .PHONY: release
 release:
 	make clean
 	make all
 	python -u setup.py sdist --format=gztar,zip,bztar
+
+
 
 .PHONY: clean
 clean:
