@@ -242,6 +242,8 @@ def run_tests():
     """Run tests defined in file 'tests'"""
     dev_nul=os.devnull
     jag_tipdf = 'python jag-tipdf'
+    txt = 'input/lipsum.txt'
+    img = 'input/logo.png'
     sys.argv.remove('test')
     retcode = 0
     for line in open('tests'):

@@ -41,8 +41,6 @@ from urllib2 import urlopen, HTTPError, URLError
 from subprocess import Popen, PIPE
 from cStringIO import StringIO
 
-
-
 class Bunch:
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
@@ -113,7 +111,7 @@ def insert_input_separator(ctx):
     else:
         ctx.y = min(ctx.y - ctx.opts.separator,
                     ctx.opts.page[1] - ctx.opts.margins.top())
-    
+
 
 #----------------------------------------------------------------------
 #                         Images
@@ -415,9 +413,11 @@ class Paging:
         canvas.color_space("fs", jagpdf.CS_DEVICE_RGB)
         canvas.color("f", *opts.font_color)
         if opts.page_color:
+            canvas.state_save()
             canvas.color("fs", *opts.page_color)
             canvas.rectangle(0, 0, *opts.page)
             canvas.path_paint("fs")
+            canvas.state_restore()
         #self.draw_margin()
             
     def draw_margin(self):
@@ -514,7 +514,7 @@ def create_initial_context(opts):
     """Creates an initial document context from global options."""
     profile = create_doc_profile(opts)
     doc = jagpdf.create_stream(PDFStream(opts), profile)
-    ctx = Bunch(doc=doc, img_cache={}, opts=opts)
+    ctx = Bunch(doc=doc, img_cache={}, input_nr=0, opts=opts)
     load_font(ctx)
     ctx.paging = opts.nup and NupPaging(ctx) or Paging(ctx)
     return ctx
@@ -698,7 +698,7 @@ def create_opt_parser():
     group.add_option("--separator",
                      action='callback', type='string', dest='separator',
                      callback=hook_separator,
-                     help="add vertical SPACE after the input; setting SPACE to 'break' inserts a page break",
+                     help="insert vertical SPACE before the input; setting SPACE to 'break' inserts a page break",
                      metavar="SPACE")
     group.add_option("--shell", action='store', dest='shellcmd',
                      help="run CMD for and use its stdout", metavar='CMD')
@@ -825,13 +825,14 @@ def main(argv=None):
             if not ctx:
                 ctx = create_initial_context(opts)
             update_context(ctx)
+            if ctx.input_nr > 0:
+                insert_input_separator(ctx)
             process_input(ctx, argv.pop(0))
+            ctx.input_nr += 1
             if not argv:
                 ctx.paging.finalize()
                 ctx.doc.finalize()
                 break
-            else:
-                insert_input_separator(ctx)
     except Error, err:
         print >>sys.stderr, err.msg
         return 1

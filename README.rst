@@ -116,11 +116,11 @@ The following commands send PDF to stdout.
 ::
 
    $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
-   $ find . -name '*.txt' -print0 | xargs -0 ./jag-tipdf --bookmark=%basename
+   $ find . -name '*.txt' -print0 | xargs -0 jag-tipdf --bookmark=%basename
    $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
    $ find /usr/share/man/man1 -name '*.gz' | \
    >     sort | \
-   >     xargs ./jag-tipdf \
+   >     xargs jag-tipdf \
    >     --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
    >     --bookmark=%filestem
 
@@ -204,9 +204,9 @@ Common Input Options
   the *INPUT*.
 
 --separator=SPACE
-  Add vertical *SPACE* after the *INPUT*. *SPACE* can be either a distance (even
-  negative) expressed in units or **break** which inserts a page break. Default
-  value: **break**.
+  Separate the *INPUT* from the previous one by adding vertical *SPACE*. *SPACE*
+  can be either a distance (even negative) expressed in units or **break** which
+  inserts a page break. Default value: **break**.
 
 --shell=CMD
   Execute *CMD* through the shell and use its stdout instead of the original
