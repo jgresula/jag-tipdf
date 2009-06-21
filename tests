@@ -7,9 +7,10 @@
 #
 # directives
 # ----------
-#  @fail        .. the test is expected to fail
-#  @req_convert .. run only if imagemagick is present
-#  @rea_pil     .. run only if PIL is present
+#  @fail         .. the test is expected to fail
+#  @req_convert  .. run only if imagemagick is present
+#  @req_pil      .. run only if PIL is present
+#  @req_pygments .. run only if Pygments are present
 
 #
 # GENERAL
@@ -43,4 +44,10 @@ $jag_tipdf $txt --char-spacing=.5 $txt --char-spacing=-.5 $txt > output/charspac
 $jag_tipdf $txt --line-spacing=.3 $txt --line-spacing=-.3 $txt > output/linespacing.pdf
 @req_pygments $jag_tipdf --highlight setup.py > output/highlight.pdf
 
+#
+# Images
+#
+$jag_tipdf --image-align=center $img --image-align=right $img --image-align=left $img > output/image_align.pdf
+$jag_tipdf --separator=0 --page=200,200 --margin=10,80,10,80 $img --no-image-fit-wide $img > output/image_fit.pdf
+$jag_tipdf $img --image-dpi=72 $img > output/image_dpi.pdf
 

@@ -128,6 +128,8 @@ The following commands send PDF to stdout.
 Manual
 ~~~~~~
 
+This is the the html version of the man page.
+
 .. manpage-start
 
 SYNOPSIS
@@ -253,8 +255,18 @@ Text Input Options
 Image Input Options
 ...................
 
+--image-align=MODE
+  Set the image alignment mode. *MODE* can be **left**, **center**, or
+  **right**. Default value: **left**.
+
+--image-fit-wide, --no-image-fit-wide
+  Resize the image if it is wider than the page. Default: turned on
+
+--image-dpi=DPI
+  Use *DPI* instead of the dpi specified in the image.
+
 Global Options
-......................
+..............
 
 
 

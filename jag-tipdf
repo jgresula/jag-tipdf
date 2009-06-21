@@ -741,16 +741,16 @@ def create_opt_parser():
     #
     groupi = OptionGroup(parser, "Image input options")
     groupi.add_option("--image-align", type="string", dest="image_align",
-                      help="image alignment, IMAGE can be on of: left, center, right [%default]",
+                      help="set the image alignment mode, IMAGE can be on of: left, center, right [%default]",
                       metavar="ALIGN")
     groupi.add_option("--image-fit-wide", action="store_true",
                       dest="image_fit_wider",
-                      help="resize image to fit page if it is wider [default]")
+                      help="resize the image if it is wider than the page [default]")
     groupi.add_option("--no-image-fit-wide", action="store_false",
                       dest="image_fit_wider",
                       help="turn off --image-fit-wide")
     groupi.add_option("--image-dpi", type="float", dest="image_dpi",
-                      help="use DPI, ignore image intrinsic dpi", metavar="DPI")
+                      help="use DPI instead of the dpi specified in the image", metavar="DPI")
     parser.add_option_group(group)
     parser.add_option_group(groupt)
     parser.add_option_group(groupi)
