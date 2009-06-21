@@ -261,7 +261,8 @@ def run_tests():
     img = 'input/logo.png'
     sys.argv.remove('test')
     predicates = {'@req_convert': lambda: program_exists('convert -version'),
-                  '@req_pil': lambda: try_import('PIL')}
+                  '@req_pil': lambda: try_import('PIL'),
+                  '@req_pygments': lambda: try_import('pygments')}
     retcode = 0
     for line in open('tests'):
         check_returncode = lambda x : x == 0

@@ -212,16 +212,48 @@ Common Input Options
   Execute *CMD* through the shell and use its stdout instead of the original
   *INPUT*.
 
- 
- 
-
 Text Input Options
 ..................
+--font=FONT
+  Show text using *FONT*. *FONT* can be either a path to a font program or a
+  core font name. Core names for monospaced fonts are: **Courier**,
+  **Courier-Bold**, **Courier-Oblique**, and **Courier-BoldOblique**. Using core
+  fonts usually leads to smaller PDFs. Default value: **Courier**.
+
+--font-size=SIZE
+  Set font size.
+
+--text-color=COLOR
+  Set text color.
+
+--encoding=ENC
+  Specify text encoding. If a file variable -\*- coding: -\*- is found in the
+  first two lines of the input, then it overrides this option and its value is
+  used instead. Default value: **iso-8859-1**.
+
+--zebra=COLORS
+  Paint a zebra with *COLORS*. *COLORS* is a list of colors.
+
+--char-spacing=FACTOR
+  Scale character spacing with *FACTOR*. Positive *FACTOR* values increase
+  character spacing whereas negative values have the opposite effect. Default
+  value is 0.
+
+--line-spacing=FACTOR
+  Scale character spacing with *FACTOR*. Positive *FACTOR* values increase the
+  distance between individual lines of text whereas negative values have the
+  opposite effect. Default value is 0.
+
+--highlight, --no-highlight
+  Turn syntax highlighting on/off. This feature requires Pygments
+  (http://pygments.org). Default: turned off
+
+
 
 Image Input Options
 ...................
 
-Document Level Options
+Global Options
 ......................
 
 

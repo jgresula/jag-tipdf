@@ -702,41 +702,43 @@ def create_opt_parser():
                      metavar="SPACE")
     group.add_option("--shell", action='store', dest='shellcmd',
                      help="run CMD for and use its stdout", metavar='CMD')
+    #
     groupt = OptionGroup(parser, "Text input options")
     groupt.add_option("--font",
                      action='store', type='string', dest='font',
-                     help="use FONT, can be either a full path or a core font name [Courier]")
+                     help="show text using FONT, can be either a full path or a core font name [Courier]")
     groupt.add_option("--font-size",
                       action='store', type='int', dest="fontsize",
-                      help="set font size to SIZE [%default]", metavar="SIZE")
-    groupt.add_option("--encoding",
-                     action='store', type='string', dest="encoding",
-                     help="ENC is input text encoding [%default]",
-                     metavar="ENC")
-    groupt.add_option("--char-spacing",
-                     action='store', type='float', dest="charspacing",
-                     help="set character spacing to FACTOR [0.0]",
-                     metavar="FACTOR")
-    groupt.add_option("--line-spacing",
-                     action='store', type='float', dest="linespacing",
-                     help="set line spacing to FACTOR [0.0]",
-                     metavar="FACTOR")
+                      help="set font size [%default]", metavar="SIZE")
     groupt.add_option("--text-color",
                      action='callback', type='string', dest="font_color",
                      callback=hook_color,
-                     help="show text in COLOR [black]",
+                     help="set text color",
                      metavar="COLOR")
+    groupt.add_option("--encoding",
+                     action='store', type='string', dest="encoding",
+                     help="specify text encoding [%default]",
+                     metavar="ENC")
     groupt.add_option("--zebra",
-                     action='callback', type='string', dest="zebra",
-                     callback=hook_color_list,
-                     help="paint a zebra with the LIST of colors",
-                     metavar="LIST")
+                      action='callback', type='string', dest="zebra",
+                      callback=hook_color_list,
+                      help="paint a zebra with the list of COLORS",
+                      metavar="COLORS")
+    groupt.add_option("--char-spacing",
+                     action='store', type='float', dest="charspacing",
+                     help="scale character spacing with FACTOR [0.0]",
+                     metavar="FACTOR")
+    groupt.add_option("--line-spacing",
+                     action='store', type='float', dest="linespacing",
+                     help="scale character spacing with FACTOR [0.0]",
+                     metavar="FACTOR")
     groupt.add_option("--highlight",
                       action="store_true", dest="highlight",
-                      help="highlights the input (needs Pygments)")
+                      help="syntax highlight the input (needs Pygments)")
     groupt.add_option("--no-highlight",
                       action="store_false", dest="highlight",
-                      help="do not highlight the input (default)")
+                      help="do not syntax highlight the input (default)")
+    #
     groupi = OptionGroup(parser, "Image input options")
     groupi.add_option("--image-align", type="string", dest="image_align",
                       help="image alignment, IMAGE can be on of: left, center, right [%default]",
