@@ -238,6 +238,21 @@ http://www.jagpdf.org/doc/jagpdf/installation.htm
             sys.exit(3)
 
 
+def program_exists(cmd):
+    try:
+        p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
+        out, err = p.communicate()
+        return p.returncode == 0
+    except OSError:
+        return False
+
+def try_import(module):
+    try:
+        __import__(module)
+        return True
+    except ImportError:
+        return False
+
 def run_tests():
     """Run tests defined in file 'tests'"""
     dev_nul=os.devnull
@@ -245,6 +260,8 @@ def run_tests():
     txt = 'input/lipsum.txt'
     img = 'input/logo.png'
     sys.argv.remove('test')
+    predicates = {'@req_convert': lambda: program_exists('convert -version'),
+                  '@req_pil': lambda: try_import('PIL')}
     retcode = 0
     for line in open('tests'):
         check_returncode = lambda x : x == 0
@@ -256,8 +273,11 @@ def run_tests():
             for m in meta.split(','):
                 if m == '@fail':
                     check_returncode = lambda x: x != 0
-                else:
-                    assert 'unknown meta command'
+                elif not predicates[m]():
+                    line = None
+                    break
+        if not line:
+            continue
         line = Template(line).substitute(locals())
         print line
         p = Popen(line, shell=True, stdout=PIPE, stderr=PIPE)
@@ -327,6 +347,5 @@ setup(name='jag-tipdf',
 #  --fetch-jagpdf
 #    - compile to pyc during install
 #  tests - figure out python interpreter path (see var jag_tipdf)
-#        - has_pil, has_imagemagick predicates
 #  setup(url='http://www.jagpdf.org/?')
 

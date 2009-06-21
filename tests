@@ -1,3 +1,15 @@
+# variables
+# ---------
+#  $jag_tipdf   .. jag_tipdf command
+#  $txt         .. a text input
+#  $img         .. an image input
+#
+# directives
+# ----------
+#  @fail        .. the test is expected to fail
+#  @req_convert .. run only if imagemagick is present
+#  @rea_pil     .. run only if PIL is present
+
 $jag_tipdf $txt > output/lipsum.pdf
 $jag_tipdf --margins=10,10,10,10 $txt > output/margins.pdf
 $jag_tipdf input/pseudocz_fvar.txt > output/filevar.pdf
@@ -11,8 +23,8 @@ $jag_tipdf --shell="echo %path" $txt > output/shell.pdf
 
 # images - PIL & imagemagick
 $jag_tipdf $img > output/logo.pdf
-$jag_tipdf --force-imagemagick input/logo.tiff > output/logotiff.pdf
-$jag_tipdf --force-pil input/logo.ppm > output/logoppm.pdf
+@req_convert $jag_tipdf --force-imagemagick input/logo.tiff > output/logotiff.pdf
+@req_pil $jag_tipdf --force-pil input/logo.ppm > output/logoppm.pdf
 
 # --input-type
 @fail $jag_tipdf input/lipsum_no_image.png > $dev_nul
