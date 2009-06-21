@@ -267,6 +267,38 @@ Image Input Options
 
 Global Options
 ..............
+-o, --output-file=FILE
+  Send output to *FILE* instead of stdout.
+
+--initial-dest=DEST
+  Set the initial destination. This option determines how the resulting PDF is
+  initially displayed. Possible values are **fitv** - fit page height to window,
+  **fith** - fit page width to window, **fit** - fit page to window, or a number
+  specifying the zoom factor - factor 1.0 corresponds to 100%.
+
+--full-screen
+  The resulting PDF will be initially displayed in full-screen mode.
+
+--page-layout=LAYOUT
+  Specify the initial page layout. *LAYOUT* can be **single**, **cont**, or
+  **cont-facing**.
+
+--owner-pwd=PWD
+  Set the owner password.
+
+--user-pwd=PWD
+  Set the user password.
+
+--user-perm=PERM
+  Set access permissions. *PERM* can be a combination of **no_print**,
+  **no_modify**, and **no_copy**.
+
+--n-up=N
+  Perform imposition of 2^\ *N* pages on a sheet. Default value: 0
+
+--doc-name=NAME
+  Set the document name. The name is displayed in the document's window title
+  bar. If not specified, then the name of the PDF file is displayed.
 
 
 

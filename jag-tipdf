@@ -758,38 +758,38 @@ def create_opt_parser():
     group = OptionGroup(parser, "Global options")
     group.add_option("-o", "--output-file",
                       action='store', type='string', dest="outfile",
-                      help="output is sent to FILE, defaults to stdout",
+                      help="send output to FILE instead of stdout",
                      metavar="FILE")
     group.add_option("--initial-dest",
                      action='callback', type='string', dest="initdest",
                      callback=hook_destination,
-                     help="set initial destination, DST can be one of: fitv, fith, fit, or a number specifying the zoom factor",
+                     help="set the initial destination, DST can be one of: fitv, fith, fit, or a number specifying the zoom factor",
                      metavar="DST")
     group.add_option("--full-screen",
                      action='store_true', dest="fullscreen",
-                     help="document will be displayed in full-screen mode")
+                     help="document will be initially displayed in full-screen mode")
     group.add_option("--page-layout",
                      action='callback', type='string', dest='pagelayout',
                      callback=hook_string_remap, callback_args=(optmap_layout,),
                      help="set initial page layout, MODE can be one of: single, cont, and cont-facing", metavar="MODE")
     group.add_option("--owner-pwd",
                      action='store', type='string', dest='ownerpwd',
-                     help="set owner password to PWD", metavar="PWD")
+                     help="set the owner password", metavar="PWD")
     group.add_option("--user-pwd",
                      action='store', type='string', dest='userpwd',
-                     help="set user password to PWD", metavar="PWD")
+                     help="set the user password", metavar="PWD")
     group.add_option("--user-perm",
                      action='callback', type='string', dest='userpermissions',
                      callback=hook_string_remap,
                      callback_args=(optset_perm, True),
-                     help="set user permissions, LIST, can be a combination of: no_print, no_modify, and no_copy",
-                     metavar="LIST")
+                     help="set access permissions, PERM can be a combination of: no_print, no_modify, and no_copy",
+                     metavar="PERM")
     group.add_option("--n-up",
                      action='store', type='int', dest='nup',
-                     help="2^N-up page imposition, default N is 0", metavar="N")
+                     help="perform imposition of 2^N pages on a sheet [0]", metavar="N")
     group.add_option("--doc-name",
                      action='store', type='string', dest="docname",
-                     help="set document name to STRING", metavar="STRING")
+                     help="set document name", metavar="STRING")
     parser.add_option_group(group)
     
     return parser
