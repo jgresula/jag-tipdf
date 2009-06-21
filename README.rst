@@ -274,7 +274,7 @@ Global Options
   Set the initial destination. This option determines how the resulting PDF is
   initially displayed. Possible values are **fitv** - fit page height to window,
   **fith** - fit page width to window, **fit** - fit page to window, or a number
-  specifying the zoom factor - factor 1.0 corresponds to 100%.
+  specifying the zoom factor - factor **1.0** corresponds to 100%.
 
 --full-screen
   The resulting PDF will be initially displayed in full-screen mode.
@@ -294,7 +294,7 @@ Global Options
   **no_modify**, and **no_copy**.
 
 --n-up=N
-  Perform imposition of 2^\ *N* pages on a sheet. Default value: 0
+  Perform imposition of 2^\ *N* pages on a sheet. Default value: **0**
 
 --doc-name=NAME
   Set the document name. The name is displayed in the document's window title
