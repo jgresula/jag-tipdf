@@ -264,6 +264,7 @@ def run_tests():
                   '@req_pil': lambda: try_import('PIL'),
                   '@req_pygments': lambda: try_import('pygments')}
     retcode = 0
+    nr_failures = 0
     for line in open('tests'):
         check_returncode = lambda x : x == 0
         line = line.strip()
@@ -285,7 +286,10 @@ def run_tests():
         out, err = p.communicate()
         if not check_returncode(p.returncode):
             print >>sys.stderr, 'FAILED:\n', err
+            nr_failures += 1
             retcode = 1
+    if nr_failures:
+        print >>sys.stderr, '\nNUMBER OF FAILED TESTS:', nr_failures
     return retcode
 
 

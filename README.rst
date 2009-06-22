@@ -1,6 +1,6 @@
 .. -*- mode: rst; coding: utf-8; -*-
 
-.. To be able to process this file without Pygments, syntax higlighting is not
+.. To be able to process this file without Pygments, syntax highlighting is not
 .. enabled by default. So a modified syntax is used for code blocks:
 ..  .. sourcecode <lang>
 ..  <empty-line>
@@ -27,8 +27,8 @@ jag-tipdf
 
 .. contents::
 
-What is it?
-~~~~~~~~~~~
+Introduction
+~~~~~~~~~~~~
 
 jag-tipdf is a command line utility that combines plain text and images into a
 single PDF. It is written in Python and it uses the `JagPDF library
@@ -106,27 +106,8 @@ Optionally, you can run tests:
    $ python setup.py test
 
 
-Examples
-~~~~~~~~
-
-The following commands send PDF to stdout.
-
- .. sourcecode console
-
-::
-
-   $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
-   $ find . -name '*.txt' -print0 | xargs -0 jag-tipdf --bookmark=%basename
-   $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
-   $ find /usr/share/man/man1 -name '*.gz' | \
-   >     sort | \
-   >     xargs jag-tipdf \
-   >     --shell="man \`basename %filestem | cut -d. -f1\` | col -b" \
-   >     --bookmark=%filestem
-
-
-Manual
-~~~~~~
+Documentation
+~~~~~~~~~~~~~
 
 This is the the html version of the man page.
 
@@ -155,7 +136,7 @@ imagemagick.
 OPTIONS
 ^^^^^^^
 
-Once an *input-option* is specified, its value remains valid accross the
+Once an *input-option* is specified, its value remains valid across the
 following *INPUT*\s. All *global-options* must precede the first *INPUT*,
 otherwise they will have no effect.
 
@@ -210,7 +191,7 @@ Common Input Options
   can be either a distance (even negative) expressed in units or **break** which
   inserts a page break. Default value: **break**.
 
---shell=CMD
+--filter=CMD
   Execute *CMD* through the shell and use its stdout instead of the original
   *INPUT*.
 
@@ -300,6 +281,23 @@ Global Options
   Set the document name. The name is displayed in the document's window title
   bar. If not specified, then the name of the PDF file is displayed.
 
+EXAMPLES
+^^^^^^^^
+
+The following commands send PDF to stdout.
+
+ .. sourcecode console
+
+::
+
+   $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
+   $ find . -name '*.txt' -print0 | xargs -0 jag-tipdf --bookmark=%basename
+   $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
+   $ find /usr/share/man/man1 -name '*.gz' | \
+   >     sort | \
+   >     xargs jag-tipdf \
+   >     --filter="man \`basename %filestem | cut -d. -f1\` | col -b" \
+   >     --bookmark=%filestem
 
 
 

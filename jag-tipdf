@@ -664,7 +664,7 @@ def create_opt_parser():
                         bookmark=None,
                         highlight=False,
                         tabsize=4,
-                        shellcmd=None,
+                        filtercmd=None,
                         force_pil=False,
                         force_imagemagick=False,
                         input_type='auto'                        
@@ -700,8 +700,8 @@ def create_opt_parser():
                      callback=hook_separator,
                      help="insert vertical SPACE before the input; setting SPACE to 'break' inserts a page break",
                      metavar="SPACE")
-    group.add_option("--shell", action='store', dest='shellcmd',
-                     help="run CMD for and use its stdout", metavar='CMD')
+    group.add_option("--filter", action='store', dest='filtercmd',
+                     help="run CMD through the shell and use its stdout", metavar='CMD')
     #
     groupt = OptionGroup(parser, "Text input options")
     groupt.add_option("--font",
@@ -860,8 +860,8 @@ def treat_as_text(ctx):
 
 re_is_url = re.compile('^(?:http|ftp)://\S+$', re.I)
 def get_stream(ctx):
-    if ctx.opts.shellcmd:
-        cmd = subst_template(ctx, ctx.opts.shellcmd)
+    if ctx.opts.filtercmd:
+        cmd = subst_template(ctx, ctx.opts.filtercmd)
         try:
             pipe = Popen(cmd, stdout=PIPE, shell=True)
             out, err = pipe.communicate()
@@ -892,19 +892,19 @@ if __name__ == '__main__':
 
 # TBD:
 # ----
-#  - nup - now ok, support for 2, 4, 6, 9, 16
-#  - underscore overpaint by a zebra stripe
-#  - form-feed - test in both modes (highlight, normal)
-#  - formatting of help options in parser.add_option
-#  - tbd cmd err code (according to docs - linux only)
+#  - underscore overpainted by a zebra stripe
+#  - spell check the help argument in parser.add_option
+#  - cmd err code (according to docs - linux only)
 #  - binary stdin on win
+#  - examples have bad formatting in the man page
 
 # Enhancements
 # ------------
-# - load profile from a separate file
-# - automatic horizontal margins according chars per line
-# - input prologue
-# - headers/footers
+#  - nup - now ok, support for 2, 4, 6, 9, 16
+#  - load profile from a separate file
+#  - automatic horizontal margins according chars per line
+#  - input prologue
+#  - headers/footers
     
     
 
