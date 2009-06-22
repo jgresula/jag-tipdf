@@ -256,7 +256,7 @@ def try_import(module):
 def run_tests():
     """Run tests defined in file 'tests'"""
     dev_nul=os.devnull
-    jag_tipdf = 'python jag-tipdf'
+    jag_tipdf = '"%s" jag-tipdf' % sys.executable
     txt = 'input/lipsum.txt'
     img = 'input/logo.png'
     sys.argv.remove('test')
@@ -351,6 +351,5 @@ setup(name='jag-tipdf',
 # -----
 #  --fetch-jagpdf
 #    - compile to pyc during install
-#  tests - figure out python interpreter path (see var jag_tipdf)
 #  setup(url='http://www.jagpdf.org/?')
 
