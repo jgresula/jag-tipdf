@@ -30,7 +30,7 @@ $jag_tipdf $img > output/logo.pdf
 @fail $jag_tipdf input/lipsum_no_image.png > $dev_nul
 $jag_tipdf --input-type=text input/lipsum_no_image.png > output/lipsum_explicit_text.pdf
 $jag_tipdf --input-type=image input/logo.txt > output/logo_explicit_image.pdf
-cat $img | $jag_tipdf --input-type=image > output/logo_stdin.pdf -
+< $img $jag_tipdf --input-type=image > output/logo_stdin.pdf -
 # form feed
 $jag_tipdf input/formfeed.txt > output/formfeed.pdf
 @req_pygments $jag_tipdf --highlight input/formfeed.py > output/formfeed-py.pdf
@@ -46,6 +46,7 @@ $jag_tipdf --zebra=,efefef,aaaaaa $txt --zebra= $txt > output/zebra.pdf
 $jag_tipdf $txt --char-spacing=.5 $txt --char-spacing=-.5 $txt > output/charspacing.pdf
 $jag_tipdf $txt --line-spacing=.3 $txt --line-spacing=-.3 $txt > output/linespacing.pdf
 @req_pygments $jag_tipdf --highlight setup.py > output/highlight.pdf
+$jag_tipdf --text-color=ff0000 $txt --text-color=0000ff $txt > output/textcolor.pdf
 
 #
 # Images
@@ -68,5 +69,8 @@ $jag_tipdf --n-up=1 $txt $txt $txt $txt $txt > output/nup_2.pdf
 $jag_tipdf --n-up=2 $txt $txt $txt $txt $txt $txt $txt $txt $txt > output/nup_4.pdf
 $jag_tipdf --n-up=3 $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt $txt > output/nup_8.pdf
 $jag_tipdf --doc-name=DocumentName $txt > output/docname.pdf
+$jag_tipdf --page-layout=single $txt $txt $txt > output/layout-single.pdf
+$jag_tipdf --page-layout=cont $txt $txt $txt > output/layout-cont.pdf
+$jag_tipdf --page-layout=cont-facing $txt $txt $txt > output/layout-cont-facing.pdf
 
 
