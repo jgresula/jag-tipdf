@@ -142,15 +142,18 @@ otherwise they will have no effect.
 
 There are several option argument types:
 
-* LIST comma separated list of items
-* COLOR hexadecimal *rrggbb* value 
-* STRING a string that can contain the following variables
-  * %basename 
-  * %path
-  * %page
-  * %filestem
+LIST 
+ comma separated list of items
 
-* UNITS 1/72 inch
+COLOR 
+  hexadecimal *rrggbb* value 
+
+STRING 
+  string that can contain the following variables: **%basename**, **%path**,
+  **%page**, and **%filestem**
+
+UNITS 
+  expressed in 1/72 inch
 
 General Options
 ...............

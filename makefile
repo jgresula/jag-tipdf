@@ -15,7 +15,9 @@ doc/index.htm: README.rst
 #
 # Manual is built using rst2man from README.rst; sed skips a section belonging
 # to the html output (up to '.. manpage-start' placeholder) and the manual
-# prologue is added instead
+# prologue is added instead.
+#
+# To format examples correctly, trailing backslash must be replaced by '\\ '
 # 
 # good rst2man info:
 #  http://jimmyg.org/blog/2009/generating-man-pages-from-restructuredtext.html
@@ -28,6 +30,7 @@ doc/index.htm: README.rst
 doc/jag-tipdf.1.gz: README.rst man.rst
 	env PYTHONPATH=/home/jarda/src/manpage-writer/ \
 		sed -n '/.. manpage-start/,$$p' README.rst | \
+		sed 's/\\$$/\\\\ /g' | \
 		cat man.rst - | \
 	    /usr/bin/python \
 	    ~/src/manpage-writer/tools/rst2man.py --traceback \

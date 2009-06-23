@@ -896,8 +896,6 @@ if __name__ == '__main__':
 #  - underscore overpainted by a zebra stripe
 #  - spell check the help argument in parser.add_option
 #  - cmd err code (according to docs - linux only)
-#  - binary stdin on win
-#  - examples have bad formatting in the man page
 
 # Enhancements
 # ------------
