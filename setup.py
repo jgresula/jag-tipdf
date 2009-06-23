@@ -344,7 +344,7 @@ setup(name='jag-tipdf',
       classifiers=["Development Status :: 4 - Beta",
                    "License :: OSI Approved :: MIT License",
                    "Environment :: Console",
-                   "Operating System :: Microsoft :: Windows :: Windows NT/2000"
+                   "Operating System :: Microsoft :: Windows :: Windows NT/2000",
                    "Operating System :: POSIX :: Linux",
                    "Programming Language :: Python",
                    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
