@@ -341,7 +341,7 @@ setup(name='jag-tipdf',
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
       url='http://www.jagpdf.org/jag-tipdf',
-      classifiers=["Development Status :: 4 - Beta"
+      classifiers=["Development Status :: 4 - Beta",
                    "License :: OSI Approved :: MIT License",
                    "Environment :: Console",
                    "Operating System :: Microsoft :: Windows :: Windows NT/2000"
