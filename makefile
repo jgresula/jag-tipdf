@@ -63,6 +63,12 @@ release:
 	python -u setup.py sdist --format=gztar,zip,bztar
 
 
+.PHONY: publish
+publish:
+	scp dist/* jagpdf.org@klenot.cz:public_html/www/downloads/jag-tipdf
+	scp doc/*.htm doc/*.css jagpdf.org@klenot.cz:public_html/www/jag-tipdf
+
+
 
 .PHONY: clean
 clean:
