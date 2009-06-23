@@ -287,15 +287,27 @@ Global Options
 EXAMPLES
 ^^^^^^^^
 
-The following commands send PDF to stdout.
-
+All .txt files in the current directory tree.
  .. sourcecode console
 
 ::
 
-   $ lynx -nolist -dump http://www.catb.org/~esr/faqs/smart-questions.html | jag-tipdf -
-   $ find . -name '*.txt' -print0 | xargs -0 jag-tipdf --bookmark=%basename
+   $ find . -name '.txt' -print0 | xargs -0 jag-tipdf --bookmark=%basename
+
+
+1MB of random characters.
+ .. sourcecode console
+
+::
+
    $ < /dev/urandom tr -dc '!-~' | head -c1048576 | fold | jag-tipdf - 
+
+
+Manual pages from the section 1.
+ .. sourcecode console
+
+::
+
    $ find /usr/share/man/man1 -name '*.gz' | \
    >     sort | \
    >     xargs jag-tipdf \
