@@ -1,14 +1,14 @@
 @import url(html4css1.css);
 
 body {    
-    color: #202020; 
+/*     color: #202020;  */
     background-color: #ffffff;
     font-size:   90%;
     line-height: 125%;
     font-family: Arial, Geneva, Helvetica, sans-serif;
 }
 
-h1, h1, h2, h3, h4, strong {
+h1, h1, h2, h3, h4 {
     color: #1240AB;
 }
 
