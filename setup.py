@@ -263,6 +263,8 @@ def run_tests():
     txt = 'input/lipsum.txt'
     img = 'input/logo.png'
     sys.argv.remove('test')
+    if not os.path.isdir('output'):
+        os.mkdir('output')
     predicates = {'@req_convert': lambda: program_exists('convert -version'),
                   '@req_pil': lambda: try_import('PIL'),
                   '@req_pygments': lambda: try_import('pygments')}
