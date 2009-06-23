@@ -21,7 +21,7 @@ jag-tipdf
 =========
 :Author: Jaroslav Gresula
 :Contact: jarda@jagpdf.org
-:Version: 0.1-alpha
+:Version: 0.1-beta
 :Date: $Date:$
 :License: `MIT License <http://www.opensource.org/licenses/mit-license.php>`_
 
@@ -70,10 +70,11 @@ Features
 Obtaining
 ~~~~~~~~~
 
-The software is in an alpha state, the development branch is available at
-`GitHub <http://github.com/jgresula/jag-tipdf>`_.
+This software is beta. The latest version can be downloaded from
+http://jagpdf.org/downloads/jag-tipdf.
 
-To clone the branch, do:
+The development branch is available at `GitHub
+<http://github.com/jgresula/jag-tipdf>`_. To clone the branch, do:
 
  .. sourcecode console
 
@@ -94,8 +95,8 @@ To install jag-tipdf, run
    $ python setup.py install
 
 If JagPDF is not installed on your system, you can use ``--fetch-jagpdf``, which
-downloads and installs prebuilt JagPDF (Linux only). Otherwise you have to
-install JagPDF `manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
+downloads and installs prebuilt JagPDF. Otherwise you have to install JagPDF
+`manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
 
 Optionally, you can run tests:
 
@@ -104,6 +105,18 @@ Optionally, you can run tests:
 ::
 
    $ python setup.py test
+
+
+Known issues
+~~~~~~~~~~~~
+
+The following issues are related to the underlying JagPDF library. Fixes for
+some of the problems are already in the JagPDF development branch and will be
+included in the upcoming JagPDF 1.4.0 release.
+
+- in some rare cases, height of a JPEG image is 1 - fixed `here
+  <http://github.com/jgresula/jagpdf/commit/d876ce91be9c743f1ad650783c48922b27151916>`_
+- syntax highlighting might produce unexpectedly large PDF
 
 
 Documentation
@@ -315,6 +328,10 @@ Manual pages from the section 1.
    >     --bookmark=%filestem
 
 
+SEE ALSO
+^^^^^^^^
+The most up-to-date information can be found on the project homepage at
+<http://jagpdf.org/jag-tipdf>.
 
 BUGS
 ^^^^

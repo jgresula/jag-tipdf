@@ -335,7 +335,7 @@ setup(name='jag-tipdf',
       scripts=scripts,
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
-      classifiers=["Development Status :: 3 - Alpha",
+      classifiers=["Development Status :: 4 - Beta"
                    "License :: OSI Approved :: MIT License",
                    "Environment :: Console",
                    "Operating System :: Microsoft :: Windows :: Windows NT/2000"
