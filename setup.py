@@ -192,6 +192,9 @@ def fetch_jagpdf():
     print "fetching JagPDF for your platform (%s.%s)" % (processor, op_sys)
     downloader.fetch()
     downloader.unpack(site_packages)
+    from py_compile import compile
+    print "byte-compiling jagpdf.py"
+    compile(os.path.join(site_packages, 'jagpdf.py'))
     print 'JagPDF installation done.'
     
 def custom_install():
@@ -335,6 +338,7 @@ setup(name='jag-tipdf',
       scripts=scripts,
       license="License :: OSI Approved :: MIT License",
       data_files = data_files,
+      url='http://www.jagpdf.org/jag-tipdf',
       classifiers=["Development Status :: 4 - Beta"
                    "License :: OSI Approved :: MIT License",
                    "Environment :: Console",
@@ -344,12 +348,4 @@ setup(name='jag-tipdf',
                    "Topic :: Multimedia :: Graphics :: Graphics Conversion",
                    "Topic :: Utilities",
                    "Topic :: Text Processing"])
-
-
-#
-# TBD
-# -----
-#  --fetch-jagpdf
-#    - compile to pyc during install
-#  setup(url='http://www.jagpdf.org/?')
 
