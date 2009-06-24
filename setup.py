@@ -333,7 +333,7 @@ else:
 #
     
 setup(name='jag-tipdf',
-      version='0.1.0',
+      version='0.2.0',
       description='Combines plain text and images into a single PDF.',
       author='Jaroslav Gresula',
       author_email='jarda@jagpdf.org',
