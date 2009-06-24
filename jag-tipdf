@@ -893,6 +893,9 @@ if __name__ == '__main__':
 
 # TBD:
 # ----
+#  - improve help screen
+#    - brief description before option list
+#    - point to man page or to the online docs
 #  - underscore overpainted by a zebra stripe
 #  - spell check the help argument in parser.add_option
 #  - cmd err code (according to docs - linux only)

@@ -351,3 +351,7 @@ setup(name='jag-tipdf',
                    "Topic :: Utilities",
                    "Topic :: Text Processing"])
 
+# TBD
+#  - use JagPDF's setup.py since 1.4.0
+#  - setup(long_description="rst description")
+
