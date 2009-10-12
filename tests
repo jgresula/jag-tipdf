@@ -11,6 +11,7 @@
 #  @req_convert  .. run only if imagemagick is present
 #  @req_pil      .. run only if PIL is present
 #  @req_pygments .. run only if Pygments are present
+#  @req_posix    .. run only on a POSIX system
 
 #
 # GENERAL
@@ -21,7 +22,7 @@ $jag_tipdf --page=Letter $txt --page=A4 $txt --page=700,400 $txt --page=700,1400
 $jag_tipdf --bookmark=%basename $txt --bookmark=%filestem $txt --bookmark=%path $txt --bookmark=%basename $img > output/bookmarks.pdf
 $jag_tipdf --page-color=777777 $txt --page-color=8822ff $txt > output/pagecolor.pdf
 $jag_tipdf $img --separator=0 $img --separator=72 $img --separator=break $txt > output/separator.pdf
-$jag_tipdf --filter="echo %path" $txt > output/filter.pdf
+@req_posix $jag_tipdf --filter="echo %path" $txt > output/filter.pdf
 # images - PIL & imagemagick
 $jag_tipdf $img > output/logo.pdf
 @req_convert $jag_tipdf --force-imagemagick input/logo.tiff > output/logotiff.pdf
