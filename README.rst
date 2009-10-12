@@ -21,7 +21,7 @@ jag-tipdf
 =========
 :Author: Jaroslav Gresula
 :Contact: jarda@jagpdf.org
-:Version: 0.1-beta
+:Version: 0.2.0-beta
 :Date: $Date:$
 :License: `MIT License <http://www.opensource.org/licenses/mit-license.php>`_
 
@@ -32,7 +32,8 @@ Introduction
 
 jag-tipdf is a command line utility that combines plain text and images into a
 single PDF. It is written in Python and it uses the `JagPDF library
-<http://jagpdf.org>`_ under the hood. It runs on x86/Linux and x86/Windows.
+<http://jagpdf.org>`_\ , which is a Python extension running on x86/Linux,
+amd64/Linux and x86/Windows.
 
 Features
 ~~~~~~~~
@@ -86,6 +87,10 @@ The development branch is available at `GitHub
 Installation
 ~~~~~~~~~~~~
 
+jag-tipdf depends on the JagPDF library. If the library is not installed on your
+system, follow the instructions on the JagPDF `download page
+<http://www.jagpdf.org/downloads.htm>`_.
+
 To install jag-tipdf, run
 
  .. sourcecode console
@@ -94,9 +99,6 @@ To install jag-tipdf, run
 
    $ python setup.py install
 
-If JagPDF is not installed on your system, you can use ``--fetch-jagpdf``, which
-downloads and installs prebuilt JagPDF. Otherwise you have to install JagPDF
-`manually <http://www.jagpdf.org/doc/jagpdf/installation.htm>`_.
 
 Optionally, you can run tests:
 
@@ -107,16 +109,18 @@ Optionally, you can run tests:
    $ python setup.py test
 
 
-Known issues
-~~~~~~~~~~~~
+History
+~~~~~~~
 
-The following issues are related to the underlying JagPDF library. Fixes for
-some of the problems are already in the JagPDF development branch and will be
-included in the upcoming JagPDF 1.4.0 release.
+- 0.2.0 
 
-- in some rare cases, height of a JPEG image is 1 - fixed `here
-  <http://github.com/jgresula/jagpdf/commit/d876ce91be9c743f1ad650783c48922b27151916>`_
-- syntax highlighting might produce unexpectedly large PDF
+  - fixed a failing test
+  - fixed the installer for Windows
+  - removed --fetch-jagpdf from setup.py
+
+- 0.1.0 
+
+  - initial release
 
 
 Documentation
