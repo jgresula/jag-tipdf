@@ -6,10 +6,10 @@ doc/index.htm: README.rst
 	< README.rst \
 		sed 's/.. sourcecode/.. sourcecode::/g' | \
 		sed 's/^::$$//g' | \
-		rst2html --cloak-email-addresses \
-				 --link-stylesheet \
-				 --stylesheet-path=doc/style.css \
-				 - doc/index.htm
+		rst2html.py --cloak-email-addresses \
+					 --link-stylesheet \
+					 --stylesheet-path=doc/style.css \
+					 - doc/index.htm
 	sed -i "s/[$$]Date:[$$]/`date -R`/g" doc/index.htm
 
 #
